@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · look template</title>
+<!--
+  PROTOTYPE, throwaway. The smallest thing that is a "look": it shows the wiring and nothing else.
+  A real look replaces all of this. What it keeps:
+    1. ../../lesson.js for the made-up Lesson (P.lesson, P.stream, P.moments, P.testIntuition, P.keep).
+    2. ../bridge.js for the moment (Look.moment, Look.onMoment, Look.go).
+    3. data-pane="chat" and data-pane="widget" on the two panes, 48% and 52% of the width.
+    4. It fills the window exactly (no page scroll) and draws any moment straight from ?moment=N.
+-->
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font: 16px/1.5 system-ui, sans-serif; overflow: hidden; }
+  main { height: 100%; display: grid; grid-template-columns: 48fr 52fr; }
+  [data-pane] { min-width: 0; min-height: 0; padding: 24px; overflow: auto; }
+  [data-pane="widget"] { background: #f0f0f0; }
+  button { font: inherit; min-height: 44px; padding: 0 16px; }
+</style>
+</head>
+<body>
+<main>
+  <section data-pane="chat"></section>
+  <section data-pane="widget"></section>
+</main>
+<script src="../../lesson.js"></script>
+<script src="../bridge.js"></script>
+<script>
+  const chat = document.querySelector('[data-pane="chat"]');
+  const widget = document.querySelector('[data-pane="widget"]');
+
+  function draw(moment, previous) {
+    const m = P.moments[moment - 1];
+    const items = P.stream.slice(0, m.upto);
+    chat.replaceChildren(
+      P.h('h1', { text: `Moment ${moment}: ${m.title}` }),
+      ...items.filter((it) => it.t === 'bot' || it.t === 'me').map((it) => P.h('p', it.html ? { html: it.html } : { text: 'Student: ' + it.text })),
+      P.h('button', { type: 'button', text: 'Send', onclick: () => Look.go(Look.moment + 1) }));
+    widget.replaceChildren(P.h('pre', { text: JSON.stringify(m.stage, null, 1) }));
+  }
+
+  Look.onMoment(draw);
+  draw(Look.moment, null);
+</script>
+</body>
+</html>

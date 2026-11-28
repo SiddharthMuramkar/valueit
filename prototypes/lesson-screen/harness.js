@@ -1,5 +1,7 @@
-// PROTOTYPE, throwaway. The dark bar at the bottom: switches version, moment and screen size,
+// PROTOTYPE, throwaway. The dark bar at the bottom: switches look, moment and screen size,
 // and keeps all of it in the address bar so a link reopens the same view.
+// A look is a finished-looking take on layout A; each lives in looks/<name>/ and is shown in a frame.
+// The look called "rough" is the first pass: three layouts (A, B, C) drawn by this page itself.
 (function () {
   const $ = (id) => document.getElementById(id);
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
@@ -17,18 +19,26 @@
   };
   const KB_VISIBLE = 0.47; // share of the screen left above an iPad's on-screen keyboard, roughly
 
+  const LOOKS = [...(P.looks || []), { slug: 'rough', name: 'First rough pass', blurb: 'Layout only: three layouts, placeholder colours and type.' }];
+  if (qs.get('look') === '_template') LOOKS.push({ slug: '_template', name: 'Template', blurb: 'Wiring only.' });
+  const l0 = qs.get('look');
+  const SPLIT = 48; // the owner's choice for layout A: Chatbot 48, Widget 52
+
   const v0 = (qs.get('variant') || '').toUpperCase();
   const state = P.state = {
+    look: LOOKS.some((l) => l.slug === l0) ? l0 : qs.get('variant') ? 'rough' : LOOKS[0].slug,
     variant: VK.includes(v0) ? v0 : 'A',
     moment: clamp((parseInt(qs.get('moment'), 10) || 1) - 1, 0, N - 1),
     screen: SCREENS[qs.get('screen')] ? qs.get('screen') : 'fit',
     kb: qs.get('kb') === '1',
-    split: clamp(parseInt(qs.get('split'), 10) || 38, 26, 60),
+    split: clamp(parseInt(qs.get('split'), 10) || SPLIT, 26, 60),
   };
   P.ui = { focus: null, drawer: false, saved: {} };
   P.ws = {};
 
   const app = $('app'), screenEl = $('screen'), scaler = $('scaler'), viewport = $('viewport'), bar = $('protobar');
+  const frame = $('lookframe');
+  const rough = () => state.look === 'rough';
 
   for (const [k, s] of Object.entries(SCREENS)) $('s-sel').append(P.h('option', { value: k, text: s.label }));
 
@@ -50,11 +60,12 @@
 
   function syncUrl() {
     const p = new URLSearchParams();
-    p.set('variant', state.variant);
+    p.set('look', state.look);
+    if (rough()) p.set('variant', state.variant);
     p.set('moment', state.moment + 1);
     if (state.screen !== 'fit') p.set('screen', state.screen);
     if (state.kb) p.set('kb', '1');
-    if (state.variant === 'A' && state.split !== 38) p.set('split', state.split);
+    if (rough() && state.variant === 'A' && state.split !== SPLIT) p.set('split', state.split);
     try { history.replaceState(null, '', '?' + p); } catch (e) { /* some browsers refuse on file:// */ }
   }
 
@@ -72,29 +83,76 @@
     screenEl.style.transform = k === 1 ? 'none' : `scale(${k})`;
     screenEl.classList.toggle('kb-up', state.kb);
     app.style.height = state.kb ? KB_VISIBLE * 100 + '%' : '100%';
+    frame.style.width = w + 'px';
+    frame.style.height = (state.kb ? Math.round(h * KB_VISIBLE) : h) + 'px';
 
     // Surface the state.
     const parts = [`${Math.round(w)} × ${Math.round(h)}`];
     if (k < 1) parts.push(`shown at ${Math.round(k * 100)}%`);
     if (state.kb) parts.push(`${Math.round(h * KB_VISIBLE)} high above the keyboard`);
-    if (state.variant === 'A') parts.push(`split ${state.split} / ${100 - state.split}`);
+    if (!rough()) parts.push(`split ${SPLIT} / ${100 - SPLIT}`);
+    else if (state.variant === 'A') parts.push(`split ${state.split} / ${100 - state.split}`);
     $('pb-state').textContent = parts.join(' · ');
   }
 
   function syncBar() {
     const V = P.variants[state.variant], m = P.moments[state.moment];
+    const L = LOOKS.find((l) => l.slug === state.look);
+    bar.dataset.look = state.look;
+    $('l-label').textContent = L.name;
     $('v-label').textContent = `${state.variant} · ${V.name}`;
     $('m-label').textContent = `${state.moment + 1} of ${N} · ${m.title}`;
     $('s-sel').value = state.screen;
     $('kb-chk').checked = state.kb;
-    $('pb-version').textContent = `Version ${state.variant}:`;
-    $('pb-says').textContent = `${V.blurb}  ▸ Moment ${state.moment + 1}: ${m.says}`;
+    if (rough()) {
+      $('pb-version').textContent = `Layout ${state.variant}:`;
+      $('pb-says').textContent = `${V.blurb}  ▸ Moment ${state.moment + 1}: ${m.says}`;
+    } else {
+      $('pb-version').textContent = `${L.name}:`;
+      $('pb-says').textContent = `${L.blurb}  ▸ Moment ${state.moment + 1}: ${m.says.replace(/\s*Compare where[^.]*\./, '')}`;
+    }
   }
+
+  // A look draws itself inside the frame. The bar only tells it which moment to show.
+  const toLook = (msg) => frame.contentWindow && frame.contentWindow.postMessage({ source: 'valueit-bar', ...msg }, '*');
+  function showLook() {
+    const m = state.moment + 1;
+    if (frame.dataset.look !== state.look) {
+      frame.dataset.look = state.look;
+      frame.dataset.moment = m;
+      frame.src = `looks/${state.look}/index.html?moment=${m}`;
+    } else if (+frame.dataset.moment !== m) {
+      frame.dataset.moment = m;
+      toLook({ type: 'moment', moment: m });
+    }
+  }
+  addEventListener('message', (e) => {
+    const d = e.data;
+    if (!d || d.source !== 'valueit-look' || e.source !== frame.contentWindow || rough()) return;
+    if (d.type === 'ready') {
+      // The look has loaded. If the bar moved on meanwhile, catch it up.
+      if (clamp((d.moment | 0) - 1, 0, N - 1) !== state.moment) toLook({ type: 'moment', moment: state.moment + 1 });
+      frame.dataset.moment = state.moment + 1;
+    } else if (d.type === 'moment') {
+      // The Student pressed something inside the look (Send, an answer, "Go on").
+      state.moment = clamp((d.moment | 0) - 1, 0, N - 1);
+      frame.dataset.moment = state.moment + 1;
+      syncBar();
+      layout();
+      syncUrl();
+    } else if (d.type === 'key') {
+      onKey(d.key);
+    }
+  });
 
   function draw() {
     syncBar();
     layout();
     syncUrl();
+    app.hidden = !rough();
+    frame.hidden = rough();
+    if (!rough()) { app.replaceChildren(); showLook(); return; }
+    if (frame.dataset.look) { delete frame.dataset.look; frame.removeAttribute('src'); }
     const m = P.moments[state.moment];
     const before = state.moment > 0 ? P.moments[state.moment - 1].upto : 0;
     const items = P.stream.slice(0, m.upto)
@@ -124,7 +182,7 @@
 
   const calm = matchMedia('(prefers-reduced-motion: reduce)');
   function render() {
-    if (!document.startViewTransition || calm.matches) return draw();
+    if (!rough() || !document.startViewTransition || calm.matches) return draw();
     // A quick second click cuts the running transition short; that is fine, not an error.
     const t = document.startViewTransition(draw);
     t.ready.catch(() => {});
@@ -136,6 +194,13 @@
     resetMoment();
     render();
   }
+  function goLook(step) {
+    const i = LOOKS.findIndex((l) => l.slug === state.look);
+    state.look = LOOKS[(i + step + LOOKS.length) % LOOKS.length].slug;
+    P.ui.focus = null;
+    P.ui.drawer = false;
+    render();
+  }
   function goVariant(step) {
     state.variant = VK[(VK.indexOf(state.variant) + step + VK.length) % VK.length];
     P.ui.focus = null;
@@ -143,6 +208,8 @@
     render();
   }
 
+  $('l-prev').onclick = () => goLook(-1);
+  $('l-next').onclick = () => goLook(1);
   $('v-prev').onclick = () => goVariant(-1);
   $('v-next').onclick = () => goVariant(1);
   $('m-prev').onclick = () => goMoment(state.moment - 1);
@@ -150,17 +217,20 @@
   $('s-sel').onchange = (e) => { state.screen = e.target.value; render(); };
   $('kb-chk').onchange = (e) => { state.kb = e.target.checked; render(); };
 
-  // Left and right change the version, up and down change the moment.
-  // Left alone while typing or dragging a slider.
+  // Left and right change the look, up and down change the moment.
+  // Left alone while typing or dragging a slider. A look passes these keys up when it has the focus.
+  function onKey(key) {
+    if (key === 'ArrowLeft') goLook(-1);
+    else if (key === 'ArrowRight') goLook(1);
+    else if (key === 'ArrowUp') goMoment(state.moment - 1);
+    else if (key === 'ArrowDown') goMoment(state.moment + 1);
+    else return false;
+    return true;
+  }
   document.addEventListener('keydown', (e) => {
     if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === 'ArrowLeft') goVariant(-1);
-    else if (e.key === 'ArrowRight') goVariant(1);
-    else if (e.key === 'ArrowUp') goMoment(state.moment - 1);
-    else if (e.key === 'ArrowDown') goMoment(state.moment + 1);
-    else return;
-    e.preventDefault();
+    if (onKey(e.key)) e.preventDefault();
   });
 
   addEventListener('resize', layout);

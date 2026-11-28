@@ -13,14 +13,17 @@
   Question (ticket "How the Lesson screen looks and moves"):
   what does a Student see on a landscape screen during a Lesson, and how does it move?
 
-  Plan: three versions of the Lesson screen on this one page, switched with ?variant=A|B|C,
+  Plan, first pass: three layouts of the Lesson screen on this one page (?look=rough&variant=A|B|C),
   walked through nine made-up moments of one Lesson with ?moment=1..9.
+  Second pass, after the owner chose layout A at 48 / 52: several finished looks of that one layout,
+  each a folder under looks/, shown inside the screen and switched with ?look=<name>.
   All Lesson content is made up.
 -->
 <div id="viewport">
   <div id="scaler">
     <div id="screen">
       <div id="app"></div>
+      <iframe id="lookframe" title="The Lesson screen in the chosen look" hidden></iframe>
       <div id="kb" aria-hidden="true"></div>
     </div>
   </div>
@@ -30,11 +33,19 @@
   <div class="pb-row">
     <span class="pb-tag">PROTOTYPE · made-up content</span>
     <div class="pb-group">
-      <button id="v-prev" type="button" aria-label="Previous version">‹</button>
+      <span class="pb-k">Look</span>
+      <button id="l-prev" type="button" aria-label="Previous look">‹</button>
+      <span id="l-label" class="pb-label look"></span>
+      <button id="l-next" type="button" aria-label="Next look">›</button>
+    </div>
+    <div class="pb-group" id="g-version">
+      <span class="pb-k">Layout</span>
+      <button id="v-prev" type="button" aria-label="Previous layout">‹</button>
       <span id="v-label" class="pb-label"></span>
-      <button id="v-next" type="button" aria-label="Next version">›</button>
+      <button id="v-next" type="button" aria-label="Next layout">›</button>
     </div>
     <div class="pb-group">
+      <span class="pb-k">Moment</span>
       <button id="m-prev" type="button" aria-label="Previous moment">‹</button>
       <span id="m-label" class="pb-label wide"></span>
       <button id="m-next" type="button" aria-label="Next moment">›</button>
@@ -52,6 +63,7 @@
 <script src="variant-a.js"></script>
 <script src="variant-b.js"></script>
 <script src="variant-c.js"></script>
+<script src="looks/looks.js"></script>
 <script src="harness.js"></script>
 </body>
 </html>

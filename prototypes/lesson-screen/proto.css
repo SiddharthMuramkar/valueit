@@ -29,6 +29,8 @@ body {
 #screen { position: absolute; left: 0; top: 0; transform-origin: top left; background: var(--bg); overflow: hidden; }
 #viewport.framed #scaler { box-shadow: 0 0 0 10px #0d0e10, 0 14px 50px rgba(0, 0, 0, .5); border-radius: 6px; }
 #app { container: app / size; width: 100%; height: 100%; }
+#lookframe { position: absolute; left: 0; top: 0; border: 0; display: block; background: #fff; }
+#lookframe[hidden] { display: none; }
 
 #kb { display: none; position: absolute; left: 0; right: 0; bottom: 0; height: 53%; background: #d0d4db; border-top: 1px solid #aeb3bd;
   padding: 14px 10px 26px; flex-direction: column; gap: 9px; }
@@ -45,8 +47,11 @@ body {
 .pb-group { display: inline-flex; align-items: center; gap: 6px; }
 .pb-group button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #3a3d43; background: #1e2125; color: #fff; font-size: 18px; line-height: 1; cursor: pointer; }
 .pb-group button:hover { background: #2c3036; }
+.pb-k { color: #a9a59b; }
 .pb-label { min-width: 160px; text-align: center; font-weight: 650; }
-.pb-label.wide { min-width: 330px; }
+.pb-label.look { min-width: 130px; }
+.pb-label.wide { min-width: 300px; }
+#protobar:not([data-look="rough"]) #g-version { display: none; }
 .pb-group select { height: 32px; max-width: 240px; border-radius: 8px; background: #1e2125; color: #fff; border: 1px solid #3a3d43; font: inherit; padding: 0 6px; }
 #pb-state { float: right; margin-left: 16px; color: #a9a59b; font-variant-numeric: tabular-nums; }
 .pb-says { margin-top: 6px; color: #c9c5bb; line-height: 1.4; }

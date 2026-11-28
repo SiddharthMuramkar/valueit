@@ -1,0 +1,9 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+.vercel/
+*.sqlite*
+.prototype-notes.json*
+.vercel

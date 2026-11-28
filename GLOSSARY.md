@@ -6,6 +6,10 @@ A guided course that teaches finance, following Aswath Damodaran's classes. It i
 
 The Course is made of five Topics, in a fixed order. Each Topic is made of Lessons, in a fixed order. Each Lesson follows one Lesson Plan. People mostly talk about Topics and Lessons; the Course is just all of them together.
 
+Each Topic is built on one or two of Damodaran's Classes. Each Lesson is built on one Session, part of a dense one, two short ones joined, or matching parts of two, in his order.
+
+Portfolio Management is built on his Investment Philosophies Class: it is about choosing a way of investing, not about building a portfolio.
+
 ## Language
 
 **Course**:
@@ -43,3 +47,11 @@ _Avoid_: quiz, test (Damodaran's own), check, exam
 **Note**:
 Something a Student saves from a Lesson to come back to later. A Student's Notes are all of these together.
 _Avoid_: clipboard, bookmark, favourite
+
+**Class**:
+One of Damodaran's own short online classes, which a Topic is built on.
+_Avoid_: course (there is one Course), lecture series, Topic (a Topic is ValueIt's)
+
+**Session**:
+One video of a Class, with its slide deck and its test.
+_Avoid_: lecture, webcast, Lesson (a Lesson is ValueIt's)

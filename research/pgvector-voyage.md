@@ -1,318 +1,121 @@
 # How to search Damodaran's material with pgvector on Neon and Voyage
 
-Research for [How to search Damodaran's material with pgvector on Neon and Voyage](https://github.com/SiddharthMuramkar/valueit/issues/27). Checked on 2026-11-28 against the vendors' own documentation. Desk research only: no account was made or touched, nothing was installed, no API was called and no money was spent. Every code block is illustrative and has not been run. Every time figure is somebody else's measurement or an estimate made here, and is marked as such.
+This recipe updates the [retrieval research](https://github.com/SiddharthMuramkar/valueit/issues/27) for the choices in [Lock the stack](https://github.com/SiddharthMuramkar/valueit/issues/17) and [What the Chatbot does and never does](https://github.com/SiddharthMuramkar/valueit/issues/10). It describes a proposed build. ValueIt's corpus, search quality, ingestion and live response times still need verification.
 
-It builds on three earlier files and does not repeat them: [material-search.md](https://github.com/SiddharthMuramkar/valueit/blob/research/material-search/research/material-search.md), [database-signin-invite.md](https://github.com/SiddharthMuramkar/valueit/blob/research/database-signin-invite/research/database-signin-invite.md) and [app-stack.md](https://github.com/SiddharthMuramkar/valueit/blob/research/app-stack/research/app-stack.md).
+## What happens during a Lesson
 
-## The answer
+1. The server checks the Student's sign-in and current approval, then reads the current Lesson, idea, and named passage references from its Lesson Plan. Fetch those exact passages from Neon in plan order before sending the teaching request to OpenAI. This lookup uses passage IDs and source revisions. It requires no Voyage call. Validate every reference when publishing the plan. If a required passage is missing or unreadable at runtime, keep the idea in place and give the Student a retry message.
+2. For a question beyond those passages, the Chatbot can request an additional search. It supplies a short finance query and chooses Lesson or Topic scope. The app derives the actual Lesson and Topic IDs from the authorized conversation. Matched passages are internal teaching context. Students see the Chatbot's explanation.
+3. Offer OpenAI's web tool only on a Student message asking how the concept applies today, including equivalent phrasing. Lesson openings, automatic Widget events and ordinary finance questions have no web tool. Determine eligibility from the Student's intent before offering tools; on ambiguity, ask for clarification. Where an answer uses web information, preserve the provider's citation annotations and display prominent clickable inline source links. [OpenAI web search](https://developers.openai.com/api/docs/guides/tools-web-search)
 
-**It is a small, ordinary build and nothing blocks it: one table in the Neon database ValueIt already has, one new key (Voyage), one small search function the Chatbot can call, and one loading script. At this size no search index is needed.**
+## Prepare and load material
 
-How it works, in plain words:
+1. Create a private Neon bucket. Pin each original, including each spreadsheet, under a key containing its SHA-256. Record its original filename, source URL, acquisition date, full digest and immutable object key in a private manifest. Verify the downloaded bytes against the manifest before use. A revised file gets a new entry and key. The Cost of Capital worksheet already has a [reference digest](https://github.com/SiddharthMuramkar/valueit/blob/research/cost-of-capital-spreadsheets/research/cost-of-capital-spreadsheets.md#L45-L52).
+2. Run production ingestion inside a deployed Vercel job restricted to the owner. Check owner authorization on the server before enqueueing work. Bind storage and database credentials to the selected environment. Send the job a manifest ID and read originals from the private bucket inside the deployment. Keep the production database, bucket, OpenAI and Voyage secrets in their deployed runtime. A local `vercel env run` cannot retrieve Vercel Secret values. Local testing can use fixtures and mocks. A preview can use its own credentials, test data and target branch. [Vercel Secret behavior](https://vercel.com/changelog/environment-variables-now-use-config-and-secret-types) · [CLI implementation](https://github.com/vercel/vercel/blob/main/packages/cli/src/commands/env/run.ts#L168-L214)
+3. Prepare one candidate passage per slide or worked test question. Extract the slide text and, where a visual contributes teaching content, send the page to a supported OpenAI vision model to describe its axes, units, values and conclusion. Verify those descriptions against the original before publishing. Keep the prepared records private. The initial corpus, lecture and spreadsheet extraction rules, and who reviews prepared text belong to [How Damodaran's material becomes something the Chatbot can search](https://github.com/SiddharthMuramkar/valueit/issues/21).
+4. Enable the extension with a migration containing `CREATE EXTENSION IF NOT EXISTS vector`. Give each passage a stable reference comprising source revision, kind and position; store the exact text, text hash, source locator, labels, document model and vector. Store Lesson and Topic memberships separately or as explicit links so changing a label does not re-embed text. A Lesson Plan pins the revision and the passage. Optional similarity search reads only published, active material.
+5. Validate a complete staged revision before activating it. Validate expected item count, source digests, references and vectors. Deduplicate embedding work by text hash, model and dimensions. Apply membership changes even when text is unchanged. Publish in one database transaction per source, checking that the active revision still matches the job's expected predecessor. Retrying the same prepared revision has no effect; a conflicting revision needs a fresh comparison. Preserve older revisions referenced by Lesson Plans. A partial load or failed API call must leave the previous revision readable.
 
-1. **Each slide of his becomes one row** in a table in ValueIt's own database: the slide's text, a short written account of any chart on it, and labels (Topic, Lesson, his Class, his Session, slide number).
-2. **Voyage turns each row's text into a list of 1,024 numbers** that stands for its meaning. The list is stored in the row. This happens once, when the material is loaded.
-3. **When the Chatbot wants to look something up**, ValueIt sends the question to Voyage, gets the same kind of list back, and asks the database for the rows whose lists are closest, held to the current Lesson or the current Topic.
-4. **The Chatbot reads those few slides** and answers in its own words. The Student never sees them.
+## Embed and search
 
-### What it means for ValueIt
+Use an Atlas model API key on its matching endpoint. For an unscoped Atlas key, send `POST https://ai.mongodb.com/v1/embeddings` with bearer authentication. The self-serve trial allows three requests and 10,000 tokens per minute before a payment method is added. Configure the organization’s training opt-out before submitting real course content or Student-derived queries. It requires a valid payment method. Verify the setting with the owner; this research has made no account change. An opt-out covers training use. Verify retention separately if a retention guarantee is required. [Atlas API overview](https://www.mongodb.com/docs/voyageai/api-reference/overview/) · [Atlas organization settings](https://www.mongodb.com/docs/atlas/tutorial/manage-organization-settings/#manage-data-collection-for-voyage-ai-model-training)
 
-- **One new account, one new key, one hand step.** Voyage belongs to MongoDB. The key is made by the owner and pasted into the Vercel project's settings by hand. There is no Vercel Marketplace install for it.
-- **Two doors to the same models.** A key can be made in MongoDB Atlas (MongoDB's main console) or in Voyage's own older dashboard. Each key works only at its own web address. MongoDB now calls Voyage's own platform "legacy" and makes its published promises about model retirement only for the Atlas door. For a new project the Atlas door is the safer one. A key from the older door also works today.
-- **A payment card must be on file before real use.** Without one, the account is held to 3 requests a minute, which is 3 searches a minute for all Students together. With one, the limit is 2,000 a minute and the free allowance still applies.
-- **It costs next to nothing.** All of his slides and tests for the whole Course are under a million tokens. Voyage gives 200 million free. Paying full price would be about ten cents. The table adds about 10 MB to the database.
-- **No index, on purpose.** The whole Course is about 2,000 to 2,500 rows and Accounting 101 is under 200 (estimates from the deck counts). The database can compare the question against every row in a few thousandths of a second (estimate from Neon's own measurement). That is exact, needs no tuning, and makes the Lesson and Topic limits exact too. An index would only make results approximate.
-- **Search adds about a third to half a second** (estimate). Next to the 23 to 52 seconds the model thinks at xhigh effort, that is nothing. If the Chatbot decides for itself when to look (recommended), the real cost is one more round of thinking by the model, not the search.
-- **Worth knowing: at Lesson level the search is choosing among a dozen or two slides.** A Lesson rests on one Session, part of one, or matching parts of two. Search held to one Lesson will work, but it earns its keep when it is held to a Topic (hundreds of slides) or opened to the Course.
-- **Chart slides: describe them in words once, at loading time.** OpenAI's model reads the deck (it sees each page as text and as a picture) and writes what each chart shows. Voyage's picture-reading model was looked at and is not the simpler path: a matched picture gives the Chatbot nothing to read.
-- **If Voyage is down, the Chatbot still teaches.** The material is a small part of what it draws on. The search function must fail quietly and return nothing.
-- **By default, what is sent to Voyage may be kept and used to train its models.** That includes the search questions. It can be switched off, but only once a card is on file.
+Use separate document and query model settings, initially both `voyage-4-large`, at 1,024 dimensions. Use `input_type: "document"` when embedding the prepared passages and `"query"` when embedding a short model-written finance query. A query can reflect a Student's words. Send only the query text to Voyage; keep identifiers, conversations and source files out of query requests. Ingestion separately sends prepared passage text. OpenAI receives the teaching context required for its response. Neon remains the canonical conversation store. OpenAI's `store: false` governs Responses application state; provider data controls and retention have their own terms. [OpenAI data controls](https://developers.openai.com/api/docs/guides/your-data)
 
-**Voyage against OpenAI's own embeddings, in one line:** OpenAI's would do the same job with no new vendor, account or key (`text-embedding-3-small` or `-large`, same OpenAI key); Voyage's own tests put its best model ahead on search quality, and one independent test found a much smaller lead.
+Validate the response count, indices, dimensions and finite coordinates before accepting a batch. Start with exact cosine distance in Postgres. Filter by active revision, compatible stored document model, authorized Topic and, for Lesson scope, Lesson membership. Order by distance and stable passage ID to break ties and return up to six. There is no approximate vector index at this size. Matching dimensions and a **documented compatible embedding space** permit switching the query encoder within the Voyage 4 family without rewriting existing passages. Evaluate the change on representative questions. For incompatible spaces or dimensions, stage new vectors for every active passage and swap the active configuration after verification. [MongoDB migration guide](https://www.mongodb.com/docs/voyageai/tutorials/migrate-embedding-model/) · [pgvector](https://github.com/pgvector/pgvector#querying)
 
-### The choices, and the default for each
+## Route example
 
-| Choice | Default | Why |
-|---|---|---|
-| Voyage model | `voyage-4-large`, for the stored rows and for the questions | Voyage's best general model. Voyage says its 4 series now beats its own finance model, which is on a retirement schedule. |
-| Size of each list | 1,024 numbers (the model's default) | Nothing to set, nothing to get wrong. Storage is trivial. |
-| Where the key is made | MongoDB Atlas, "AI Model APIs" | The door MongoDB supports going forward. |
-| How the code calls Voyage | One plain web request (`fetch`) in one small file | One call. The official code package is still at version 0.6 and points at the older door unless told otherwise. |
-| Index on the lists | None | Under about 10,000 rows, comparing against every row is fast and exact. |
-| Keyword search as well | Not now | Small body, exact search, and the model reads several results. Add it only if the check questions show misses. |
-| Re-ranking step, picture-reading model | Not now | A second call and a second thing to fail, for little gain at this size. |
-| How the Chatbot calls it | A function the Chatbot may call when it decides to look. The app, not the Chatbot, turns "this Lesson" or "this Topic" into the real limit | Best quality: the model writes a proper search question and can look twice. Speed is not weighed. |
-| One passage | One slide. One test question with its worked answer | His slides are already the right size: about 700 to 1,050 characters each. |
-| Where loading runs | A script a coding agent runs, with keys handed over by Vercel at run time | Smallest thing that works for 11 decks. See the caveat about write-only keys below. |
+The following JavaScript illustrates the control flow for a teaching turn. `input` already includes the authorized conversation context and exact Lesson Plan passages. `create` wraps the Responses SDK with the job's configured model and reasoning effort, a request deadline and the teaching instructions. `search` binds the approved Lesson and Topic on the server, returns an array, and enforces a shorter deadline for the Voyage and Postgres calls. The example permits three optional material calls per turn and at most four model passes. A retry starts from the last complete turn in Neon.
 
-### The recipe
-
-For a coding agent. Read today's docs first (Voyage, pgvector, Drizzle, OpenAI): names in this area change often. All code below is illustrative and has not been run.
-
-**Step 0. The owner's part (about 10 minutes, once).**
-
-1. Make a MongoDB Atlas account. No database is needed. In the console open "AI Model APIs" and create a model API key. Leave cloud and geography on `any`.
-2. Add a payment card. This lifts the limit from 3 requests a minute to 2,000. The first 200 million tokens stay free. Atlas makes a $1 test charge and refunds it.
-3. Decide whether Voyage may train on what is sent. To refuse: Organization Settings, switch "Help Improve Voyage AI Models" off.
-4. Paste the key into the Vercel project's settings as `VOYAGE_API_KEY`, for Production and Preview.
-
-If the key comes from Voyage's own dashboard instead, everything below is the same except the address: `https://api.voyageai.com/v1` in place of `https://ai.mongodb.com/v1`.
-
-**Step 1. One settings file, so the model is named in exactly one place.**
-
-```ts
-// lib/material/config.ts  (illustrative, not run)
-export const VOYAGE_BASE_URL = "https://ai.mongodb.com/v1"; // must match the door the key came from
-export const EMBEDDING_MODEL = "voyage-4-large";
-export const EMBEDDING_DIMENSIONS = 1024;
-```
-
-**Step 2. Switch pgvector on.** Drizzle does not do this. Create an empty migration with `drizzle-kit generate --custom` and put one line in it. It must run before the table's migration.
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-**Step 3. The table.**
-
-```ts
-// db/schema/material.ts  (illustrative, not run)
-import { sql } from "drizzle-orm";
-import { bigserial, integer, pgTable, text, timestamp, uniqueIndex, vector } from "drizzle-orm/pg-core";
-
-export const materialPassages = pgTable(
-  "material_passages",
-  {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-
-    // ValueIt's labels: what a search is held to. Changing them needs no re-embedding.
-    topic: text("topic").notNull(),                                        // "accounting-101"
-    lessons: text("lessons").array().notNull().default(sql`'{}'::text[]`), // usually one Lesson, sometimes two
-
-    // His labels: where the passage comes from.
-    class: text("class").notNull(),      // "accounting"
-    session: text("session").notNull(),  // his own label, as text: "2", "2A", "preview"
-    kind: text("kind").notNull(),        // "slide" | "test"
-    position: integer("position").notNull(), // slide number, or question number in a test
-
-    title: text("title"),
-    content: text("content").notNull(),  // exactly what was embedded and what the Chatbot reads
-    contentHash: text("content_hash").notNull(),
-
-    embedding: vector("embedding", { dimensions: 1024 }).notNull(),
-    embeddingModel: text("embedding_model").notNull(), // "voyage-4-large"
-    loadedAt: timestamp("loaded_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [uniqueIndex("material_source_key").on(t.class, t.session, t.kind, t.position)],
-);
-```
-
-No index on `embedding`. The unique key is there so that loading twice updates rows and never doubles them. Use `drizzle-kit generate` and `migrate`, not `push`.
-
-**Step 4. Talking to Voyage.** One function, used by loading and by search.
-
-```ts
-// lib/material/voyage.ts  (illustrative, not run)
-import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL, VOYAGE_BASE_URL } from "./config";
-
-export async function embed(texts: string[], inputType: "document" | "query"): Promise<number[][]> {
-  const res = await fetch(`${VOYAGE_BASE_URL}/embeddings`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.VOYAGE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      input: texts,                 // at most 1,000 texts and 120,000 tokens per call for this model
-      model: EMBEDDING_MODEL,
-      input_type: inputType,        // "document" when loading, "query" when searching. Never leave it out.
-      output_dimension: EMBEDDING_DIMENSIONS,
-      truncation: false,            // fail loudly on an over-long text
-    }),
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!res.ok) throw new Error(`Voyage ${res.status}`);
-  const json = await res.json();
-  return json.data.sort((a: any, b: any) => a.index - b.index).map((d: any) => d.embedding);
-}
-```
-
-**Step 5. Loading, in two stages.** The original PDFs and everything made from them stay in the private place, never in this repo.
-
-*Stage A, prepare (slow, done once per deck, its output is worth reading before it is loaded):*
-
-1. Read the deck and take the text of each page: `extractText` from `unpdf` returns one string per page.
-2. Send the whole deck to `gpt-6.2-sol` as a PDF file input with `detail: "high"` and ask, as structured output, for one entry per page: the slide's title, and a plain account of any chart, table or diagram (what it shows, its axes or columns, the numbers that matter). An empty account for a page with no visual. Do not ask it to rewrite his text.
-3. Write one record per slide: the labels, the title, his text as extracted, and the account of the visual. For a test, one record per question with its worked answer.
-4. Build `content` for each record with a heading on top, so a slide carries its context: Class and Session title on the first line, slide title on the second, then his text, then "What the slide shows: ...".
-5. Fill `topic` and `lessons` from a small mapping file kept with the Lesson Plans (Lesson to Class, Session and slide range).
-
-*Stage B, load (fast, repeatable):*
-
-1. For records whose `content_hash` or model differs from what is stored, call `embed(texts, "document")` in batches.
-2. Insert or update by the unique key. Delete rows whose source no longer exists.
-3. Print counts: rows added, changed, unchanged, removed, and tokens used.
-
-Run both with keys handed over at run time and never written to disk: `vercel env run -e <environment> -- pnpm tsx scripts/load-material.ts <folder>`. Load into the database branch the live app reads, and into Neon's default branch if that is a different one, because preview copies are made from the default branch.
-
-A caveat for the owner. Vercel can hand a script only the keys it stores as readable ("Config"). A key stored as write-only ("Secret"), which is Vercel's default for Production and Preview, reaches code running inside Vercel and, as far as the docs show, nothing else. So either the keys this script needs (OpenAI, Voyage, the database address) are also stored as readable in the environment the script reads, or loading moves into a Vercel Workflow. See open question 4.
-
-**Step 6. The search function.**
-
-```ts
-// lib/material/search.ts  (illustrative, not run)
-import { and, arrayContains, cosineDistance, eq } from "drizzle-orm";
-import { db } from "@/db";
-import { materialPassages as m } from "@/db/schema/material";
-import { EMBEDDING_MODEL } from "./config";
-import { embed } from "./voyage";
-
-type Where = { topic: string; lesson?: string }; // set by the app from where the Student is, never by the model
-
-export async function searchMaterial(query: string, where: Where, k = 6) {
-  const [vector] = await embed([query], "query");
-  const distance = cosineDistance(m.embedding, vector);
-  return db
-    .select({ class: m.class, session: m.session, kind: m.kind, position: m.position, title: m.title, content: m.content, distance })
-    .from(m)
-    .where(
-      and(
-        eq(m.embeddingModel, EMBEDDING_MODEL), // rows from another model are invisible, never wrongly matched
-        eq(m.topic, where.topic),
-        where.lesson ? arrayContains(m.lessons, [where.lesson]) : undefined,
-      ),
-    )
-    .orderBy(distance) // smallest distance first
-    .limit(k);
-}
-```
-
-Wrap the call so that any failure (Voyage down, time-out, database error) returns an empty list and a log line.
-
-**Step 7. The tool the Chatbot is given, beside web search.**
-
-```ts
-// illustrative, not run
-const searchMaterialTool = {
+```js
+const materialTool = {
   type: "function",
   name: "search_material",
-  description:
-    "Look up how Aswath Damodaran explains an idea in the slides and tests of his Classes. " +
-    "Returns a few short passages. Use them to stay close to his way of explaining. " +
-    "Never quote them, name them or mention them to the Student.",
+  description: "Look up additional course passages relevant to a finance concept.",
   strict: true,
   parameters: {
     type: "object",
     properties: {
-      query: { type: "string", description: "What to look for, as a full question in plain finance words." },
-      scope: {
-        type: "string",
-        enum: ["lesson", "topic"],
-        description: "lesson: only this Lesson's material. topic: all Lessons of this Topic.",
-      },
+      query: { type: "string" },
+      scope: { type: "string", enum: ["lesson", "topic"] },
     },
     required: ["query", "scope"],
     additionalProperties: false,
   },
-} as const;
+};
 
-const tools = [{ type: "web_search" }, searchMaterialTool];
-
-let response = await openai.responses.create({
-  model: "gpt-6.2-sol",
-  reasoning: { effort: "xhigh" },
-  instructions,
-  input,
-  tools,
-});
-
-for (let round = 0; round < 3; round++) {
-  const calls = response.output.filter((item) => item.type === "function_call");
-  if (calls.length === 0) break;
-  const outputs = await Promise.all(
-    calls.map(async (call) => {
-      const { query, scope } = JSON.parse(call.arguments);
-      const passages = await searchMaterial(query, {
-        topic: current.topic,
-        lesson: scope === "lesson" ? current.lesson : undefined,
+async function runTeachingTurn({ input, webEligible, create, search }) {
+  const history = [...input];
+  const tools = webEligible ? [materialTool, { type: "web_search" }] : [materialTool];
+  let remaining = 3;
+  for (;;) {
+    let response;
+    try {
+      response = await create({
+        input: [...history], store: false, include: ["reasoning.encrypted_content"],
+        tools, tool_choice: remaining ? "auto" : "none",
       });
-      return { type: "function_call_output" as const, call_id: call.call_id, output: JSON.stringify({ passages }) };
-    }),
-  );
-  response = await openai.responses.create({
-    model: "gpt-6.2-sol",
-    reasoning: { effort: "xhigh" },
-    instructions,                         // not carried over by previous_response_id
-    previous_response_id: response.id,    // keeps the model's reasoning from the first round
-    input: outputs,
-    tools,
-  });
+    } catch {
+      return { status: "retry" };
+    }
+    if (response.status !== "completed") return { status: "retry" };
+    const calls = response.output.filter(item => item.type === "function_call");
+    if (!calls.length) {
+      const content = response.output.filter(item => item.type === "message")
+        .flatMap(message => message.content);
+      const refusal = content.find(item => item.type === "refusal");
+      if (refusal) return { status: "refused", message: refusal.refusal };
+      if (!content.some(item => item.type === "output_text" && item.text.trim())) {
+        return { status: "retry" };
+      }
+      return { status: "answered", content }; // preserves text and URL annotations
+    }
+    if (!remaining) return { status: "retry" };
+    history.push(...response.output); // preserve all items in order, including encrypted reasoning
+    for (const call of calls) {
+      let result = { status: "limit" };
+      if (remaining > 0) {
+        remaining--;
+        result = { status: "invalid" };
+        try {
+          const args = JSON.parse(call.arguments);
+          if (call.name === "search_material" && typeof args?.query === "string"
+              && args.query.trim() && ["lesson", "topic"].includes(args.scope)) {
+            result = { status: "unavailable" };
+            const passages = await search(args.query.trim(), args.scope);
+            result = passages.length ? { status: "found", passages } : { status: "empty" };
+          }
+        } catch {
+          // Malformed arguments stay invalid; a failed optional lookup stays unavailable.
+        }
+      }
+      history.push({ type: "function_call_output", call_id: call.call_id,
+        output: JSON.stringify(result) });
+    }
+  }
 }
 ```
 
-The real route streams; the loop is the same. To make the Chatbot look on a given turn, set `tool_choice` to this function for the first request of that turn.
+Instruct the Chatbot to continue teaching from the plan when optional search returns empty, unavailable or over budget. It must not claim a match in those states. Present a refusal as such. Offer retry for an incomplete or failed reply and persist only the confirmed Student-facing result, including its web annotations. Record operation status and timing without passage text or Student queries. Apply the same rules to streaming: assemble complete output items before continuing a tool round, and commit the turn only after a terminal result. The Responses API accepts encrypted reasoning in stateless continuations. [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
 
-**Step 8. A check that needs no model.** Write about twenty check questions, each with the slide it should fetch. A script runs `searchMaterial` on each and prints the top six. Because the search is exact, the result only changes when the material or the Voyage model changes. Add one check to `pnpm check`: every row's `embedding_model` equals the model named in the settings file.
+## Offline verification of the route example
 
-### Every key and account, and where each lives
+The audit extracted the JavaScript above and executed it with mock Responses, Voyage and database results. Eleven scenarios passed: ordinary opening, eligible web turn with citations, optional lookup unavailable, empty lookup, invalid arguments, a batch exceeding the budget, another tool call on the final pass, empty model output, refusal, transport failure and an incomplete response. The checks included stateless reasoning replay and the three-call cap. Live provider integration, retrieval quality and visit duration still need measurements.
 
-| Thing | Made at | Lives in | Set by hand? |
-|---|---|---|---|
-| MongoDB Atlas account, with a card | MongoDB | The owner signs in | Yes, once. **New.** |
-| `VOYAGE_API_KEY` | Atlas, "AI Model APIs" (or Voyage's own dashboard) | Vercel project settings | Yes. **New.** |
-| The Voyage address | Fixed by which door the key came from | One line in the code | No secret |
-| `OPENAI_API_KEY` | OpenAI | Vercel project settings | Already there |
-| `DATABASE_URL` and its relatives | Neon's integration | Vercel project settings | No |
-| The table, its labels and the search function | ValueIt | The Neon database and this repo | No key |
+## Checks for implementation
 
-Nothing new is stored in Neon's or OpenAI's settings. Voyage needs no setting inside Neon: the two never talk to each other. ValueIt's code sits between them.
-
-### Who keeps what working
-
-| Part | Whose it is |
-|---|---|
-| Turning text into lists of numbers; the model itself; its speed and uptime | Voyage (MongoDB) |
-| The database, the pgvector extension, waking from sleep, preview copies | Neon |
-| The Chatbot's decision to look, and what it does with what it reads | OpenAI's model, steered by ValueIt's instructions |
-| The table and its labels; the search function; the rule for when search fails; the loading script; the written accounts of charts; the list of check questions | **ValueIt.** Written by coding agents, checked by `pnpm check` and the check questions |
-
-This is more to own than OpenAI's hosted file search would have been. What is bought with that: exact limits by Lesson and Topic, every row open to inspection, results that do not shift under ValueIt, and checks that can run without a model.
-
-### Costs
-
-| | One-off | Each month |
-|---|---|---|
-| Voyage, loading the whole Course (under 1 million tokens) | $0 inside the free 200 million. About $0.12 at full price | |
-| Voyage, 10,000 searches (about 20 tokens each) | | $0 inside the free allowance. About $0.02 at full price |
-| OpenAI, writing accounts of chart slides (rough estimate, nothing measured) | About $1 for Accounting 101, about $10 to $20 for 140 decks | |
-| OpenAI, reading six passages per search (about 2,000 tokens) | | About $0.004 a search |
-| Neon, about 10 MB more storage | | Under one cent |
-
-### Risks, honestly
-
-1. **A second AI vendor.** One more account, card, set of terms and thing that can be down. The search must fail quietly.
-2. **A model that can be retired.** `voyage-4-large` is current with no end date. MongoDB promises at least 18 months from "superseded" to "switched off" for embedding models, on the Atlas door only. When it happens, every row is re-embedded: about a minute of machine time and a few cents. Nothing else changes.
-3. **The 3-requests-a-minute trap.** A new account without a card will look broken as soon as two people use it.
-4. **Two doors, two addresses.** A key sent to the wrong address is refused. A coding agent working from memory will use the older address and older model names.
-5. **Students' words reach Voyage.** With the function route it is the Chatbot's search question, not the Student's raw message, but it can carry the same content. Switch training use off if that matters.
-6. **Mixed lists go wrong silently.** Lists from two different models have the same shape and compare without any error, giving nonsense. Hence the `embedding_model` column, the filter in the search and the check.
-7. **A wrong account of a chart misleads the Chatbot.** Nobody sees it, but the Chatbot leans on it. Someone or something must read the prepared records before loading.
-8. **Preview copies go stale.** A preview's database copy holds the material as it was when the copy was made.
-9. **The Chatbot may simply not look.** A strong model often answers from what it knows. If the "little predictability" matters on a given turn, force the look.
-
-### What would change this recipe
-
-- **More than about 10,000 rows**, for example if long lecture transcripts for all Classes are added in small pieces: add an HNSW index and turn on pgvector's "iterative scan" so that limits by Topic still return enough rows.
-- **Check questions that miss on exact names or terms**: add Postgres's built-in keyword search as a second ranking and merge the two.
-- **Slides whose meaning depends on the rest of the deck**: try `voyage-context-4`, which embeds each slide with the whole deck in view. It means re-embedding everything, which is cheap.
-- **The owner wants keys that nobody can read back, or loading from a button on the admin page**: move loading into a Vercel Workflow that reads the files from a private Vercel Blob store.
-- **The Chatbot rarely looks, or the extra round of thinking proves too slow after all**: the app runs the search itself before each request and places the passages in it.
+- Fetch two pinned passages in plan order with Voyage unavailable; a deleted required reference must fail plan validation. Verify a new source revision cannot change an old plan.
+- Re-run and interrupt a load. Confirm duplicate requests, competing revisions and metadata-only relabelling leave the correct active rows, and a failed load preserves the last published revision.
+- Exercise an ordinary Lesson opening, a Student's present-day application question, an optional lookup with zero matches, a Voyage timeout, a refusal, repeated search calls and a tool-only response at the call limit. Verify student-visible citations on an actual web answer. This document's control-flow examples can be simulated offline; service behavior requires integration checks.
+- Label about twenty representative Lesson and Topic questions with expected passages, including chart-heavy slides. Measure recall in the first six results, scope leakage and latency on the intended deployment. Exact nearest neighbors describes the database calculation. It does not establish teaching relevance.
+- Compare the costs of the content load and search with actual usage. Published model rates and estimated passage counts are planning inputs.
 
 ---
 
 ## Evidence
 
-Every source below was read on 2026-11-28. Where a page prints its own date, that is given as "updated".
+The original investigation recorded the sources and versions below on 2026-11-28. The revised recipe above cites the service behavior checked again in the audit.
 
 ### 1. Voyage today
 
@@ -405,26 +208,13 @@ Every source below was read on 2026-11-28. Where a page prints its own date, tha
 
 - A function tool is declared with `type: "function"`, `name`, `description`, `parameters` and `strict`. "We recommend always enabling strict mode", which needs `additionalProperties: false` and every field listed as required. [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) (read 2026-11-28)
 - The flow has five steps: request with tools, receive a tool call, run the code "on the application side", "make a second request to the model with the tool output", receive the answer "(or more tool calls)". Same page (read 2026-11-28)
-- "For reasoning models ... any reasoning items returned in model responses with tool calls must also be passed back with tool call outputs." Same page (read 2026-11-28). Sending `previous_response_id` with only the new items is OpenAI's documented way to continue. [OpenAI: WebSocket mode example](https://developers.openai.com/api/docs/guides/websocket-mode) (read 2026-11-28)
+- "For reasoning models ... any reasoning items returned in model responses with tool calls must also be passed back with tool call outputs." Same page (read 2026-11-28). For stateful requests, `previous_response_id` is also supported. The recipe above replays the items because it uses stateless requests. [OpenAI: WebSocket mode example](https://developers.openai.com/api/docs/guides/websocket-mode) (read 2026-11-28)
 - Function tools and built-in tools share one request: "functions can be called in parallel when built-in tools are also available. Built-in tools cannot be included in a parallel function-call batch." [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) (read 2026-11-28). The `tools` list: "Supports built-in tools, MCP tools, and function calls (custom tools)." [OpenAI: Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) (read 2026-11-28)
 - "Based on the provided prompt, the model automatically decides whether to use a configured tool." [OpenAI: Using tools](https://developers.openai.com/api/docs/guides/tools) (read 2026-11-28). "Use the system prompt to describe when (and when not) to use each function." [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) (read 2026-11-28)
 - A look can be forced: with `tool_choice: {"type": "function", "name": "..."}` the model must "Call exactly one specific function". Same page (read 2026-11-28)
 - `max_tool_calls` caps "calls to built-in tools" only. It does not cap ValueIt's function, so the app caps its own loop. [OpenAI: Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) (read 2026-11-28)
 - Web search at xhigh is documented: OpenAI's web search guide shows `reasoning: { effort: "xhigh" }` with the `web_search` tool. [OpenAI: Web search](https://developers.openai.com/api/docs/guides/tools-web-search) (read 2026-11-28, from a search excerpt)
-- How the two sit together, reasoned from the above: web search runs inside OpenAI during a response. A call to ValueIt's function ends the response and waits for the app. A turn that uses both therefore takes two requests in a row inside the one Vercel function, and the Student's stream carries on across them.
-
-**The two ways, side by side**
-
-| | The Chatbot decides (function tool) | The app searches first |
-|---|---|---|
-| Who writes the search question | The model, in proper finance words | The Student's last message, as typed ("ok but why?") |
-| Looks when not needed | No | Every turn |
-| Can look twice, or widen from Lesson to Topic | Yes | No |
-| Certain to have seen his material | Only if forced with `tool_choice` | Always |
-| Requests to OpenAI per turn | Two when it looks | One |
-| Time added | The search, plus one more round of thinking | The search only |
-
-Opinion: with learning quality deciding and speed not weighed, the function is the better default. The app-first way is the fallback.
+- How the two sit together, reasoned from the above: web search runs inside OpenAI during a response. A call to ValueIt's function ends the response and waits for the app. A turn with one material-tool round requires a follow-up request; further rounds require additional calls.
 
 **Time one search adds (estimate)**
 
@@ -442,17 +232,14 @@ Two cautions. An older report on Voyage's forum describes 3 to 5 seconds per cal
 
 - **Text per slide.** `unpdf` is a library "optimized for serverless environments" that bundles Mozilla's PDF.js. `extractText(data)` returns `{ totalPages, text }` with "one string per page" unless `mergePages` is set. Version 2.2.3, published 2026-11-26, MIT licence. [unpdf](https://github.com/unjs/unpdf), [npm: unpdf](https://www.npmjs.com/package/unpdf) (read 2026-11-28)
 - Alternatives looked at: `pdfjs-dist` 6.5.438 (the same engine without the wrapper, Apache-2.0) and `mupdf` 1.28.6 (also renders pages, but its licence is AGPL-3.0, a poor fit). [npm: pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist), [npm: mupdf](https://www.npmjs.com/package/mupdf) (read 2026-11-28)
-- **Chart slides, without drawing pages ourselves.** OpenAI accepts a PDF as an `input_file` (by upload, by link or as Base64). "PDF parsing includes both extracted text and page images in context." `detail: "high"` is "for more visual detail, such as dense charts, small print, or diagrams". Each file "must be under 50 MB". It needs "a model that accepts image inputs", which `gpt-6.2-sol` is. [OpenAI: File inputs](https://developers.openai.com/api/docs/guides/file-inputs) (read 2026-11-28)
-- The answer can be forced into a fixed shape (one entry per page) with `text.format` of type `json_schema`. [OpenAI: Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) (read 2026-11-28)
+- **Chart slides, without drawing pages ourselves.** OpenAI accepts a PDF as an `input_file` (by upload, by link or as Base64). "PDF parsing includes both extracted text and page images in context." `detail: "high"` is "for more visual detail, such as dense charts, small print, or diagrams". Each file "must be under 50 MB". It needs "a model that accepts image inputs", which must be verified for the selected deployed model. [OpenAI: File inputs](https://developers.openai.com/api/docs/guides/file-inputs) (read 2026-11-28)
+- The output schema constrains the shape. Verify page count and order against the extracted source before accepting descriptions. Use `text.format` of type `json_schema`. [OpenAI: Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) (read 2026-11-28)
 - OpenAI's own cookbook for slide decks does the same thing in spirit: describe each page with a vision model, cut "by page", and put "the slide title, deck title" at the top of each piece. Quoted in the earlier research. [material-search.md](https://github.com/SiddharthMuramkar/valueit/blob/research/material-search/research/material-search.md) (read 2026-11-28)
 - If a page ever has to be drawn as a picture in Node, `unpdf`'s `renderPageAsImage` needs the extra package `@napi-rs/canvas`. Not needed for the recipe. [unpdf](https://github.com/unjs/unpdf) (read 2026-11-28)
 - **Passage size.** A deck is 8,000 to 12,600 characters over about a dozen slides, so a slide is roughly 700 to 1,050 characters, about 150 to 250 tokens. The model's limit is 32,000 tokens per text. One slide is one passage; nothing needs splitting or joining. (Arithmetic done here from the figures in the ticket.)
 - **Labels.** A Lesson is built on "one Session, part of a dense one, two short ones joined, or matching parts of two". [GLOSSARY.md](https://github.com/SiddharthMuramkar/valueit/blob/main/GLOSSARY.md) (read 2026-11-28). His Sessions carry labels like "2A" and "Preview". [How the Course breaks into Topics and Lessons](https://github.com/SiddharthMuramkar/valueit/issues/13) (read 2026-11-28). So: the Lesson label belongs to each slide, not to a deck; it can hold more than one Lesson; and the Session label is text, not a number.
-- **Where loading runs.** `vercel env run -- <command>` "fetches the environment variables directly from your linked Vercel project and passes them to the specified command", "without writing them to a file". [Vercel CLI: env](https://vercel.com/docs/cli/env) (read 2026-11-28)
-- **The caveat.** Vercel now stores each variable as "Config" (readable later) or "Secret" ("write-only after saving"). New variables for Production and Preview default to Secret; for Development the default is Config. `vercel env pull` writes "a placeholder" for a Secret whose value cannot be read. The page does not say what `vercel env run` does with a Secret. [Vercel: Config and Secret environment variables](https://vercel.com/docs/environment-variables/sensitive-environment-variables), [Vercel CLI: env](https://vercel.com/docs/cli/env) (read 2026-11-28). So a script on someone's machine can only get keys that are stored as readable.
-- **The other place.** A Vercel Workflow runs inside Vercel, where write-only keys are available. A function marked `'use step'` gets "built-in retries", and a workflow's steps "pause, resume, and maintain state across crashes and deployments". [Vercel: Workflows](https://vercel.com/docs/workflows) (read 2026-11-28). The files would sit in a private Vercel Blob store (`vercel blob put <file> --access private`). [Vercel: Blob](https://vercel.com/docs/vercel-blob) (read 2026-11-28). They cannot be posted through a Vercel Function: the limit is 4.5 MB. [app-stack.md](https://github.com/SiddharthMuramkar/valueit/blob/research/app-stack/research/app-stack.md) (read 2026-11-28)
-- Stage B is small enough for one ordinary request: under a million tokens is fewer than ten calls to Voyage at 120,000 tokens each, plus a few thousand rows written. Only stage A is long, because it waits on the model once per deck. (Arithmetic done here.)
-- **If the Voyage model changes.** Inside the 4 series nothing stored needs redoing; only the model named for questions changes. To any other model, every row's list is made again from the stored text (stage B only), and the column changes too if the new lists have a different length. Labels and text stay. "Moving from voyage-3.5, voyage-3-large, or older models requires re-embedding because the embedding space differs from Voyage 4." [Vercel AI Gateway: Voyage 4](https://vercel.com/ai-gateway/models/voyage-4) (read 2026-11-28)
+- Vercel passes Secret values to its deployments. Its local CLI cannot retrieve a write-only value. The production loader above reads private Neon objects and uses deployment credentials. [Vercel Secret types](https://vercel.com/changelog/environment-variables-now-use-config-and-secret-types) · [Vercel CLI source](https://github.com/vercel/vercel/blob/main/packages/cli/src/commands/env/run.ts#L168-L214)
+- Query and document models may differ when they share a documented embedding space and use identical vector dimensions. The migration guide recommends regenerating corpus vectors when migrating models and requires it across incompatible spaces. [MongoDB migration guide](https://www.mongodb.com/docs/voyageai/tutorials/migrate-embedding-model/)
 - MongoDB's notice periods on the Atlas door, for embedding models: 12 months from Legacy to Deprecated, 6 more to Retired, with "a named replacement model, a migration guide, and embedding model migration credits". A retired model answers with HTTP 410. [MongoDB: model lifecycle](https://www.mongodb.com/docs/voyageai/models/lifecycle) (read 2026-11-28)
 
 ### 5. Versions on 2026-11-28
@@ -470,32 +257,12 @@ From the public npm registry and Neon's extension list.
 
 ---
 
-## Open questions and what could not be confirmed
+## Outstanding evidence
 
-Nothing was run. These are the points where the documentation stops.
-
-1. **Search quality on his slides.** No question was ever put to a real table. The twenty check questions in step 8 are the first real evidence.
-2. **How well the text comes out of his PDFs.** Reading order, tables and formulas were not tried. Run stage A on two or three real decks before trusting it.
-3. **How good the written accounts of charts are**, and who reads them before loading. This belongs to [How Damodaran's material becomes something the Chatbot can search](https://github.com/SiddharthMuramkar/valueit/issues/21).
-4. **Whether `vercel env run` can hand a write-only (Secret) key to a script.** The docs say such values cannot be read back and that `env pull` writes a placeholder; they are silent on `env run`. If it cannot, either the keys the script needs are stored as readable in one environment, or loading moves into a Workflow. This is the owner's call, because it touches the rule that keys live only in Vercel.
-5. **How long Voyage takes for `voyage-4-large` from a Vercel function.** Voyage publishes nothing. Time it on a deployed preview.
-6. **How much one more round of thinking costs at xhigh.** Not measured anywhere found.
-7. **How often the Chatbot will choose to look.** Unknown until tried. `tool_choice` is the lever.
-8. **Whether Voyage's own door will close.** MongoDB calls it legacy and publishes a migration guide, with no date. Voyage's own pages still invite sign-ups.
-9. **Whether the free 200 million tokens survive switching training use off.** Voyage's terms say they "may" be void. At ValueIt's size the full price is cents.
-10. **Whether model API use inside an Atlas account made through the Vercel Marketplace lands on the Vercel bill.** MongoDB's page says "all ... services" without naming it. Not worth chasing for a bill of cents.
-11. **Whether `voyage-context-4` or the multimodal model share a space with the 4 series.** Voyage names only the four `voyage-4` models as compatible.
-12. **Drizzle 1.0.** The column and distance helpers were read in today's docs, which cover 0.45. Whether the release candidate changes them was not checked.
-
-Questions this raises for the map:
-
-- Which database branch is "production", and is it also Neon's default branch? Loading must reach both.
-- Where do the prepared records live, given this repo is public? They hold his text.
-- Does any Lesson Plan need the Chatbot to have read his slide on a given step? If so, that step forces the look, or simply carries the slide's text.
-- If lecture transcripts are added, how small are the pieces? That decides whether the table stays under 10,000 rows.
+The open questions concern application behavior. Retrieval quality on the actual slides, accuracy of extracted tables and formulas, review of chart descriptions, latency from the deployed region, the teaching model's access to necessary modalities and tools, and the need for approximate indexing after adding lecture transcripts all require verification. Pricing and capacity estimates apply to the documented slide and test subset. Select the production branch and test source permissions in the deployed environment before running the first ingest. No account access, billing change, upload, credential retrieval or live model call was part of this research.
 
 ## How this was researched
 
 Library and service documentation came first: Context7 for Voyage, Voyage's TypeScript package, pgvector, Drizzle, OpenAI and unpdf; Neon's documentation tools for pgvector, extensions, branching, sleep and the Vercel integration; Vercel's documentation search for environment variables, Workflows and Blob. Web searches went to Parallel, Octen, Tavily and Firecrawl together, and pages were read through Parallel. Package versions came from the public npm registry, and one README and one issue from GitHub.
 
-Tavily was not connected as a tool in this session; its command-line client was used and worked. Firecrawl's results were thinner than the others on two searches. No provider failed. No Neon, Vercel, MongoDB, Voyage or OpenAI account was read or changed.
+The original investigation also used Tavily's command-line client. The audit checked the primary documentation linked in the revised recipe and exercised the example offline. No Neon, Vercel, MongoDB, Voyage or OpenAI account was read or changed.

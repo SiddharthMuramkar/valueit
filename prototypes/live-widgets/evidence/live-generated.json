@@ -1,0 +1,763 @@
+{
+  "source": "Actual ValueIt project Responses API calls, gpt-6.2-sol, xhigh, 2026-11-28. Replayed unchanged for review; no credentials or database IDs.",
+  "examples": [
+    {
+      "briefId": "balance-sheet",
+      "title": "Balance sheet",
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "widget",
+            "catalogId": "https://value-it.xyz/catalogs/prototype-finance-v1.json",
+            "sendDataModel": true
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "loan": 400,
+              "cash": 400,
+              "cart": 600,
+              "equity": 1000
+            }
+          }
+        },
+        {
+          "version": "1.0",
+          "updateComponents": {
+            "surfaceId": "widget",
+            "components": [
+              {
+                "id": "root",
+                "component": "Column",
+                "children": [
+                  "heading",
+                  "loanInput",
+                  "stacks",
+                  "explanation",
+                  "ledger"
+                ]
+              },
+              {
+                "id": "heading",
+                "component": "Text",
+                "variant": "heading",
+                "text": "Maya’s coffee cart"
+              },
+              {
+                "id": "loanInput",
+                "component": "NumberInput",
+                "label": "Bank loan",
+                "value": {
+                  "@path": "/loan"
+                },
+                "min": 0,
+                "max": 800,
+                "step": 100,
+                "unit": "$"
+              },
+              {
+                "id": "stacks",
+                "component": "Chart",
+                "title": "Equipment and debt grow together",
+                "unit": "$",
+                "min": 0,
+                "max": 1800,
+                "groups": [
+                  {
+                    "label": "Assets",
+                    "segments": [
+                      {
+                        "label": "Cash",
+                        "value": {
+                          "@path": "/cash"
+                        },
+                        "tone": "cash"
+                      },
+                      {
+                        "label": "Cart",
+                        "value": {
+                          "@path": "/cart"
+                        },
+                        "tone": "neutral"
+                      },
+                      {
+                        "label": "Equipment",
+                        "value": {
+                          "@path": "/loan"
+                        },
+                        "tone": "equipment"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Liabilities + equity",
+                    "segments": [
+                      {
+                        "label": "Owner’s equity",
+                        "value": {
+                          "@path": "/equity"
+                        },
+                        "tone": "royal"
+                      },
+                      {
+                        "label": "Bank loan",
+                        "value": {
+                          "@path": "/loan"
+                        },
+                        "tone": "loan"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "explanation",
+                "component": "Text",
+                "variant": "caption",
+                "text": "Maya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed."
+              },
+              {
+                "id": "ledger",
+                "component": "Table",
+                "title": "Balance sheet ledger",
+                "unit": "$",
+                "rows": [
+                  {
+                    "label": "Cash remaining",
+                    "value": {
+                      "@path": "/cash"
+                    }
+                  },
+                  {
+                    "label": "Cart (paid outright)",
+                    "value": {
+                      "@path": "/cart"
+                    }
+                  },
+                  {
+                    "label": "Equipment (bought with the loan)",
+                    "value": {
+                      "@path": "/loan"
+                    }
+                  },
+                  {
+                    "label": "Total assets",
+                    "value": {
+                      "@call": "sum",
+                      "args": {
+                        "a": {
+                          "@call": "sum",
+                          "args": {
+                            "a": {
+                              "@path": "/cash"
+                            },
+                            "b": {
+                              "@path": "/cart"
+                            }
+                          }
+                        },
+                        "b": {
+                          "@path": "/loan"
+                        }
+                      }
+                    },
+                    "emphasis": true
+                  },
+                  {
+                    "label": "Owner’s equity",
+                    "value": {
+                      "@path": "/equity"
+                    }
+                  },
+                  {
+                    "label": "Bank loan",
+                    "value": {
+                      "@path": "/loan"
+                    }
+                  },
+                  {
+                    "label": "Total liabilities + equity",
+                    "value": {
+                      "@call": "sum",
+                      "args": {
+                        "a": {
+                          "@path": "/loan"
+                        },
+                        "b": {
+                          "@path": "/equity"
+                        }
+                      }
+                    },
+                    "emphasis": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "loan": 400,
+              "cash": 400,
+              "cart": 600,
+              "equity": 1000
+            }
+          }
+        }
+      ],
+      "dataModel": {
+        "loan": 400,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "reply": "Change Maya’s bank loan and watch both stacks grow or shrink by the same amount."
+    },
+    {
+      "briefId": "profit",
+      "title": "Profit",
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "widget",
+            "catalogId": "https://value-it.xyz/catalogs/prototype-finance-v1.json",
+            "sendDataModel": true
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "revenue": 1200,
+              "expenses": 800
+            }
+          }
+        },
+        {
+          "version": "1.0",
+          "updateComponents": {
+            "surfaceId": "widget",
+            "components": [
+              {
+                "id": "root",
+                "component": "Column",
+                "children": [
+                  "heading",
+                  "expenses",
+                  "profit",
+                  "comparison",
+                  "takeaway"
+                ]
+              },
+              {
+                "id": "heading",
+                "component": "Text",
+                "variant": "heading",
+                "text": "Maya’s coffee cart"
+              },
+              {
+                "id": "expenses",
+                "component": "NumberInput",
+                "label": "Expenses",
+                "value": {
+                  "@path": "/expenses"
+                },
+                "min": 0,
+                "max": 1600,
+                "step": 100,
+                "unit": "$"
+              },
+              {
+                "id": "profit",
+                "component": "Formula",
+                "label": "Profit",
+                "expression": "Sales − Expenses",
+                "result": {
+                  "@call": "subtract",
+                  "args": {
+                    "a": {
+                      "@path": "/revenue"
+                    },
+                    "b": {
+                      "@path": "/expenses"
+                    }
+                  }
+                },
+                "unit": "$",
+                "@accessibility": {
+                  "live": "polite"
+                }
+              },
+              {
+                "id": "comparison",
+                "component": "Chart",
+                "title": "Sales, expenses, and profit",
+                "unit": "$",
+                "min": -400,
+                "max": 1600,
+                "@accessibility": {
+                  "description": "The bars share a zero line. Profit below zero is a loss."
+                },
+                "groups": [
+                  {
+                    "label": "Sales",
+                    "segments": [
+                      {
+                        "label": "Sales",
+                        "value": {
+                          "@path": "/revenue"
+                        },
+                        "tone": "royal"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Expenses",
+                    "segments": [
+                      {
+                        "label": "Expenses",
+                        "value": {
+                          "@path": "/expenses"
+                        },
+                        "tone": "neutral"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Profit",
+                    "segments": [
+                      {
+                        "label": "Profit",
+                        "value": {
+                          "@call": "subtract",
+                          "args": {
+                            "a": {
+                              "@path": "/revenue"
+                            },
+                            "b": {
+                              "@path": "/expenses"
+                            }
+                          }
+                        },
+                        "tone": "cash"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "takeaway",
+                "component": "Text",
+                "variant": "caption",
+                "text": "More sales don’t guarantee a profit. When expenses equal sales, Maya breaks even. When expenses exceed sales, she takes a loss."
+              }
+            ]
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "revenue": 1200,
+              "expenses": 800
+            }
+          }
+        }
+      ],
+      "dataModel": {
+        "revenue": 1200,
+        "expenses": 800
+      },
+      "reply": "Maya’s coffee cart takes in $1,200. Change her expenses to see how much she keeps—or loses."
+    },
+    {
+      "briefId": "present-value",
+      "title": "Present value",
+      "messages": [
+        {
+          "version": "1.0",
+          "createSurface": {
+            "surfaceId": "widget",
+            "catalogId": "https://value-it.xyz/catalogs/prototype-finance-v1.json",
+            "sendDataModel": true
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "rate": 10
+            }
+          }
+        },
+        {
+          "version": "1.0",
+          "updateComponents": {
+            "surfaceId": "widget",
+            "components": [
+              {
+                "id": "root",
+                "component": "Column",
+                "children": [
+                  "heading",
+                  "rateInput",
+                  "comparison",
+                  "calculation"
+                ]
+              },
+              {
+                "id": "heading",
+                "component": "Text",
+                "variant": "heading",
+                "text": "Present value"
+              },
+              {
+                "id": "rateInput",
+                "component": "NumberInput",
+                "label": "Annual discount rate",
+                "value": {
+                  "@path": "/rate"
+                },
+                "min": 0,
+                "max": 20,
+                "step": 1,
+                "unit": "%"
+              },
+              {
+                "id": "comparison",
+                "component": "Chart",
+                "title": "Today’s value vs. future cash",
+                "unit": "$",
+                "min": 0,
+                "max": 1210,
+                "groups": [
+                  {
+                    "label": "Today",
+                    "segments": [
+                      {
+                        "label": "Present value",
+                        "tone": "royal",
+                        "value": {
+                          "@call": "presentValue",
+                          "args": {
+                            "futureValue": 1210,
+                            "ratePercent": {
+                              "@path": "/rate"
+                            },
+                            "years": 2
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "label": "In 2 years",
+                    "segments": [
+                      {
+                        "label": "Fixed payment",
+                        "tone": "neutral",
+                        "value": 1210
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "calculation",
+                "component": "Formula",
+                "label": "How present value is calculated",
+                "expression": "$1,210 ÷ (1 + rate ÷ 100)²",
+                "result": {
+                  "@call": "presentValue",
+                  "args": {
+                    "futureValue": 1210,
+                    "ratePercent": {
+                      "@path": "/rate"
+                    },
+                    "years": 2
+                  }
+                },
+                "unit": "$",
+                "@accessibility": {
+                  "live": "polite"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "version": "1.0",
+          "updateDataModel": {
+            "surfaceId": "widget",
+            "path": "/",
+            "value": {
+              "rate": 10
+            }
+          }
+        }
+      ],
+      "dataModel": {
+        "rate": 10
+      },
+      "reply": "Try 0% and 20% to see how the discount rate changes what the payment is worth today, while the $1,210 due in two years stays fixed."
+    }
+  ],
+  "afterChat": {
+    "briefId": "balance-sheet",
+    "title": "Balance sheet",
+    "messages": [
+      {
+        "version": "1.0",
+        "createSurface": {
+          "surfaceId": "widget",
+          "catalogId": "https://value-it.xyz/catalogs/prototype-finance-v1.json",
+          "sendDataModel": true
+        }
+      },
+      {
+        "version": "1.0",
+        "updateDataModel": {
+          "surfaceId": "widget",
+          "path": "/",
+          "value": {
+            "loan": 400,
+            "cash": 400,
+            "cart": 600,
+            "equity": 1000
+          }
+        }
+      },
+      {
+        "version": "1.0",
+        "updateComponents": {
+          "surfaceId": "widget",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "heading",
+                "loanInput",
+                "stacks",
+                "explanation",
+                "ledger"
+              ]
+            },
+            {
+              "id": "heading",
+              "component": "Text",
+              "variant": "heading",
+              "text": "Maya’s coffee cart"
+            },
+            {
+              "id": "loanInput",
+              "component": "NumberInput",
+              "label": "Bank loan",
+              "value": {
+                "@path": "/loan"
+              },
+              "min": 0,
+              "max": 800,
+              "step": 100,
+              "unit": "$"
+            },
+            {
+              "id": "stacks",
+              "component": "Chart",
+              "title": "Equipment and debt grow together",
+              "unit": "$",
+              "min": 0,
+              "max": 1800,
+              "groups": [
+                {
+                  "label": "Assets",
+                  "segments": [
+                    {
+                      "label": "Cash",
+                      "value": {
+                        "@path": "/cash"
+                      },
+                      "tone": "cash"
+                    },
+                    {
+                      "label": "Cart",
+                      "value": {
+                        "@path": "/cart"
+                      },
+                      "tone": "neutral"
+                    },
+                    {
+                      "label": "Equipment",
+                      "value": {
+                        "@path": "/loan"
+                      },
+                      "tone": "equipment"
+                    }
+                  ]
+                },
+                {
+                  "label": "Liabilities + equity",
+                  "segments": [
+                    {
+                      "label": "Owner’s equity",
+                      "value": {
+                        "@path": "/equity"
+                      },
+                      "tone": "royal"
+                    },
+                    {
+                      "label": "Bank loan",
+                      "value": {
+                        "@path": "/loan"
+                      },
+                      "tone": "loan"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "explanation",
+              "component": "Text",
+              "variant": "caption",
+              "text": "Maya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed."
+            },
+            {
+              "id": "ledger",
+              "component": "Table",
+              "title": "Balance sheet ledger",
+              "unit": "$",
+              "rows": [
+                {
+                  "label": "Cash remaining",
+                  "value": {
+                    "@path": "/cash"
+                  }
+                },
+                {
+                  "label": "Cart (paid outright)",
+                  "value": {
+                    "@path": "/cart"
+                  }
+                },
+                {
+                  "label": "Equipment (bought with the loan)",
+                  "value": {
+                    "@path": "/loan"
+                  }
+                },
+                {
+                  "label": "Total assets",
+                  "value": {
+                    "@call": "sum",
+                    "args": {
+                      "a": {
+                        "@call": "sum",
+                        "args": {
+                          "a": {
+                            "@path": "/cash"
+                          },
+                          "b": {
+                            "@path": "/cart"
+                          }
+                        }
+                      },
+                      "b": {
+                        "@path": "/loan"
+                      }
+                    }
+                  },
+                  "emphasis": true
+                },
+                {
+                  "label": "Owner’s equity",
+                  "value": {
+                    "@path": "/equity"
+                  }
+                },
+                {
+                  "label": "Bank loan",
+                  "value": {
+                    "@path": "/loan"
+                  }
+                },
+                {
+                  "label": "Total liabilities + equity",
+                  "value": {
+                    "@call": "sum",
+                    "args": {
+                      "a": {
+                        "@path": "/loan"
+                      },
+                      "b": {
+                        "@path": "/equity"
+                      }
+                    }
+                  },
+                  "emphasis": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "version": "1.0",
+        "updateDataModel": {
+          "surfaceId": "widget",
+          "path": "/",
+          "value": {
+            "loan": 600,
+            "cash": 400,
+            "cart": 600,
+            "equity": 1000
+          }
+        }
+      },
+      {
+        "version": "1.0",
+        "updateDataModel": {
+          "surfaceId": "widget",
+          "path": "/loan",
+          "value": 800
+        }
+      },
+      {
+        "version": "1.0",
+        "updateDataModel": {
+          "surfaceId": "widget",
+          "path": "/",
+          "value": {
+            "loan": 800,
+            "cash": 400,
+            "cart": 600,
+            "equity": 1000
+          }
+        }
+      }
+    ],
+    "dataModel": {
+      "loan": 800,
+      "cash": 400,
+      "cart": 600,
+      "equity": 1000
+    },
+    "reply": "The bank loan was $600. I’ve set it to $800.\n\nMaya spends the extra $200 on equipment, so assets rise by $200 and the debt she owes rises by $200. Cash, the cart’s value, and owner’s equity stay the same. Both sides now total $1,800."
+  }
+}

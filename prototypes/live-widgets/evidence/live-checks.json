@@ -1,0 +1,141 @@
+{
+  "generated": [
+    {
+      "name": "Profit",
+      "status": 200,
+      "model": "gpt-6.2-sol",
+      "reasoningEffort": "xhigh",
+      "validationAttempts": 1,
+      "initialState": {
+        "revenue": 1200,
+        "expenses": 800
+      },
+      "values": "Maya’s coffee cart\nExpenses\n$\n$0\n$1,600\n\nProfit\n\nSales − Expenses\n\n$400\nSales, expenses, and profit\n$1,600\n0\n−$400\n$1,200\nSales\n$800\nExpenses\n$400\nSales\nSales\n$1,200\nExpenses\nExpenses\n$800\nProfit\nProfit\n$400\n\nMore sales don’t guarantee a profit. When expenses equal sales, Maya breaks even. When expenses exceed sales, she takes a loss.",
+      "reply": "Maya’s coffee cart takes in $1,200. Change her expenses to see how much she keeps—or loses."
+    },
+    {
+      "name": "Present value",
+      "status": 200,
+      "model": "gpt-6.2-sol",
+      "reasoningEffort": "xhigh",
+      "validationAttempts": 1,
+      "initialState": {
+        "rate": 10
+      },
+      "values": "Present value\nAnnual discount rate\n%\n0%\n20%\nToday’s value vs. future cash\n$1,210\n$0\n$1,000\nPresent value\n$1,210\nFixed payment\nToday\nPresent value\n$1,000\nIn 2 years\nFixed payment\n$1,210\n\nHow present value is calculated\n\n$1,210 ÷ (1 + rate ÷ 100)²\n\n$1,000",
+      "reply": "Try 0% and 20% to see how the discount rate changes what the payment is worth today, while the $1,210 due in two years stays fixed."
+    },
+    {
+      "name": "Balance sheet",
+      "status": 200,
+      "model": "gpt-6.2-sol",
+      "reasoningEffort": "xhigh",
+      "validationAttempts": 2,
+      "initialState": {
+        "loan": 400,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "values": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,400\nCart\n$1,400\nOwner’s equity\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$400\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$400\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$400\nTotal assets\t$1,400\nOwner’s equity\t$1,000\nBank loan\t$400\nTotal liabilities + equity\t$1,400",
+      "reply": "Change Maya’s bank loan and watch both stacks grow or shrink by the same amount."
+    }
+  ],
+  "balanceSheet": {
+    "initial": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,400\nCart\n$1,400\nOwner’s equity\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$400\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$400\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$400\nTotal assets\t$1,400\nOwner’s equity\t$1,000\nBank loan\t$400\nTotal liabilities + equity\t$1,400",
+    "student": {
+      "state": {
+        "loan": 600,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "values": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,600\nCart\nEquipment\n$1,600\nOwner’s equity\nBank loan\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$600\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$600\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$600\nTotal assets\t$1,600\nOwner’s equity\t$1,000\nBank loan\t$600\nTotal liabilities + equity\t$1,600",
+      "apiRequests": 0
+    },
+    "chatbot": {
+      "model": "gpt-6.2-sol",
+      "reasoningEffort": "xhigh",
+      "validationAttempts": 1,
+      "reply": "The bank loan was $600. I’ve set it to $800.\n\nMaya spends the extra $200 on equipment, so assets rise by $200 and the debt she owes rises by $200. Cash, the cart’s value, and owner’s equity stay the same. Both sides now total $1,800.",
+      "state": {
+        "loan": 800,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "values": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,800\nCart\nEquipment\n$1,800\nOwner’s equity\nBank loan\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$800\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$800\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$800\nTotal assets\t$1,800\nOwner’s equity\t$1,000\nBank loan\t$800\nTotal liabilities + equity\t$1,800"
+    },
+    "reopen": {
+      "storage": "scratch",
+      "state": {
+        "loan": 800,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "values": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,800\nCart\nEquipment\n$1,800\nOwner’s equity\nBank loan\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$800\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$800\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$800\nTotal assets\t$1,800\nOwner’s equity\t$1,000\nBank loan\t$800\nTotal liabilities + equity\t$1,800",
+      "changedState": {
+        "loan": 700,
+        "cash": 400,
+        "cart": 600,
+        "equity": 1000
+      },
+      "changedValues": "Maya’s coffee cart\nBank loan\n$\n$0\n$800\nEquipment and debt grow together\n$1,800\n$0\n$1,700\nCart\nEquipment\n$1,700\nOwner’s equity\nBank loan\nAssets\nCash\n$400\nCart\n$600\nEquipment\n$700\nLiabilities + equity\nOwner’s equity\n$1,000\nBank loan\n$700\n\nMaya spends the whole loan immediately on equipment. Each dollar borrowed adds a dollar to both stacks. Cash, cart value, and owner’s equity stay fixed.\n\nBalance sheet ledger\nCash remaining\t$400\nCart (paid outright)\t$600\nEquipment (bought with the loan)\t$700\nTotal assets\t$1,700\nOwner’s equity\t$1,000\nBank loan\t$700\nTotal liabilities + equity\t$1,700"
+    }
+  },
+  "notes": [
+    {
+      "name": "Balance sheet",
+      "storage": "scratch"
+    },
+    {
+      "name": "Profit",
+      "storage": "scratch"
+    },
+    {
+      "name": "Present value",
+      "storage": "scratch"
+    },
+    {
+      "name": "Balance sheet after changes",
+      "storage": "scratch"
+    }
+  ],
+  "extra": {
+    "Profit": [
+      {
+        "input": "1200",
+        "model": {
+          "revenue": 1200,
+          "expenses": 1200
+        },
+        "values": "Maya’s coffee cart\nExpenses\n$\n$0\n$1,600\n\nProfit\n\nSales − Expenses\n\n$0\nSales, expenses, and profit\n$1,600\n0\n−$400\n$1,200\nSales\n$1,200\nExpenses\n$0\nSales\nSales\n$1,200\nExpenses\nExpenses\n$1,200\nProfit\nProfit\n$0\n\nMore sales don’t guarantee a profit. When expenses equal sales, Maya breaks even. When expenses exceed sales, she takes a loss."
+      },
+      {
+        "input": "1400",
+        "model": {
+          "revenue": 1200,
+          "expenses": 1400
+        },
+        "values": "Maya’s coffee cart\nExpenses\n$\n$0\n$1,600\n\nProfit\n\nSales − Expenses\n\n−$200\nSales, expenses, and profit\n$1,600\n0\n−$400\n$1,200\nSales\n$1,400\nExpenses\n−$200\nSales\nSales\n$1,200\nExpenses\nExpenses\n$1,400\nProfit\nProfit\n−$200\n\nMore sales don’t guarantee a profit. When expenses equal sales, Maya breaks even. When expenses exceed sales, she takes a loss."
+      }
+    ],
+    "Present value": [
+      {
+        "input": "0",
+        "model": {
+          "rate": 0
+        },
+        "values": "Present value\nAnnual discount rate\n%\n0%\n20%\nToday’s value vs. future cash\n$1,210\n$0\n$1,210\nPresent value\n$1,210\nFixed payment\nToday\nPresent value\n$1,210\nIn 2 years\nFixed payment\n$1,210\n\nHow present value is calculated\n\n$1,210 ÷ (1 + rate ÷ 100)²\n\n$1,210"
+      },
+      {
+        "input": "20",
+        "model": {
+          "rate": 20
+        },
+        "values": "Present value\nAnnual discount rate\n%\n0%\n20%\nToday’s value vs. future cash\n$1,210\n$0\n$840.28\nPresent value\n$1,210\nFixed payment\nToday\nPresent value\n$840.28\nIn 2 years\nFixed payment\n$1,210\n\nHow present value is calculated\n\n$1,210 ÷ (1 + rate ÷ 100)²\n\n$840.28"
+      }
+    ]
+  }
+}

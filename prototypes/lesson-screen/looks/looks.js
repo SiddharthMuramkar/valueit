@@ -1,7 +1,6 @@
-// PROTOTYPE, throwaway. The looks the bar can switch between. Each is a folder here with its own index.html.
-// All of them are the same screen: version A, Chatbot 48% on the left, Widget 52% on the right.
+// Throwaway prototype. Each look opens the same Lesson at the chosen 48 / 52 split.
 P.looks = [
-  { slug: 'night', name: 'Night glow', blurb: 'Dark stage, glass and light: the numbers glow.' },
-  { slug: 'paper', name: 'Bold paper', blurb: 'Light and editorial: big type, solid blocks of colour.' },
-  { slug: 'play', name: 'Playful blocks', blurb: 'Bright and tactile: blocks you want to grab.' },
+  { slug: 'night', name: 'Night glow', blurb: 'Glowing meters on a dark instrument panel. Drag a lit segment to change its value.' },
+  { slug: 'paper', name: 'Bold paper', blurb: 'A printed balance sheet in gold and cobalt. Pull the grip and watch the totals turn.' },
+  { slug: 'play', name: 'Playful blocks', blurb: 'Grab a coloured block and move it. The two stacks grow together on a dotted board.' },
 ];

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bold paper · ValueIt Lesson prototype</title>
+  <link rel="stylesheet" href="paper.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="course"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span><div><small>Accounting 101 · Lesson 1</small><h1>What a company owns, owes and earns</h1></div></div>
+    <div class="route"><div class="progress"></div><button type="button" id="notes" class="outline">Notes (3)</button></div>
+  </header>
+  <main>
+    <section data-pane="chat" aria-label="Conversation">
+      <div class="stream"></div>
+      <form class="compose">
+        <button type="button" class="stuck">I'm stuck</button>
+        <div class="message"><input type="text" aria-label="Message the Chatbot" placeholder="Ask, or answer the Chatbot"><button class="send" type="submit">Send <span aria-hidden="true">↗</span></button></div>
+      </form>
+    </section>
+    <section data-pane="widget" aria-label="Widget"><div class="tabs"></div><div class="page"></div></section>
+  </main>
+  <dialog id="notebook"><div class="notebook-head"><h2>Notes</h2><button class="outline" type="button" onclick="document.querySelector('#notebook').close()">Close</button></div><ul></ul></dialog>
+  <script src="../../lesson.js"></script><script src="../../widgets.js"></script><script src="../bridge.js"></script><script src="paper.js"></script>
+</body>
+</html>

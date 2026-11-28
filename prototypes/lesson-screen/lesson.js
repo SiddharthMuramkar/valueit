@@ -78,7 +78,7 @@ const sTI = { ...s0, open: ['lesson', 'built'], focus: 'lesson', ti: 'open' };
 // The nine moments the owner steps through.
 P.moments = [
   { title: 'The Chatbot opens an idea', upto: 3,
-    says: 'The Chatbot speaks first and a ready-made Widget opens with it. Drag the sliders: nothing is sent to the Chatbot.',
+    says: 'The Chatbot opens the idea beside its first Widget. Drag the sliders to change the amounts.',
     stage: s0 },
   { title: 'The Student asks, the Chatbot thinks', upto: 5,
     says: 'At xhigh effort the wait before the first word was measured at 23 to 52 seconds. The Widget stays usable while it thinks.',

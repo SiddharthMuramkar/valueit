@@ -14,12 +14,43 @@
   const framed = window.parent !== window;
   const subs = new Set();
   let moment = clamp(new URLSearchParams(location.search).get('moment'));
+  let stopPreview;
+
+  // Both previews simulate the same build time. Every exposed amount comes from the
+  // same complete model, so the two sides of a partly revealed chart still agree.
+  function replayArrival(mode) {
+    if (moment !== 3 || !['pieces', 'whole'].includes(mode)) return;
+    stopPreview?.();
+    subs.forEach((fn) => fn(moment, null));
+    const pane = document.querySelector('[data-pane="widget"]');
+    const title = pane?.querySelector('h2');
+    if (!title) return;
+    const parts = [...pane.querySelectorAll('[data-build-part]')];
+    const originalTitle = title.textContent;
+    const timers = [];
+    const show = (part) => { part.style.removeProperty('visibility'); part.inert = false; };
+    function finish() {
+      timers.forEach(clearTimeout);
+      title.textContent = originalTitle;
+      parts.forEach(show);
+      stopPreview = null;
+    }
+    stopPreview = finish;
+    title.textContent = 'Building the Widget…';
+    for (const part of parts) { part.style.visibility = 'hidden'; part.inert = true; }
+    if (mode === 'pieces') {
+      timers.push(setTimeout(() => { title.textContent = originalTitle; }, 300));
+      timers.push(setTimeout(() => parts.filter(p => p.dataset.buildPart === 'amounts').forEach(show), 900));
+    }
+    timers.push(setTimeout(finish, 1600));
+  }
 
   const tell = (msg) => { if (framed) window.parent.postMessage({ source: 'valueit-look', ...msg }, '*'); };
 
   function set(n, fromBar) {
     n = clamp(n);
     if (n === moment) return;
+    stopPreview?.();
     const prev = moment;
     moment = n;
     try {
@@ -33,7 +64,9 @@
 
   window.addEventListener('message', (e) => {
     const d = e.data;
-    if (d && d.source === 'valueit-bar' && d.type === 'moment') set(d.moment, true);
+    if (!framed || e.source !== window.parent || d?.source !== 'valueit-bar') return;
+    if (d.type === 'moment') set(d.moment, true);
+    if (d.type === 'arrival') replayArrival(d.mode);
   });
 
   document.addEventListener('keydown', (e) => {

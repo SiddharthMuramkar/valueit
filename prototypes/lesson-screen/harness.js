@@ -99,6 +99,7 @@
     const V = P.variants[state.variant], m = P.moments[state.moment];
     const L = LOOKS.find((l) => l.slug === state.look);
     bar.dataset.look = state.look;
+    $('arrival-preview').hidden = rough() || state.look === '_template' || state.moment !== 2;
     $('l-label').textContent = L.name;
     $('v-label').textContent = `${state.variant} · ${V.name}`;
     $('m-label').textContent = `${state.moment + 1} of ${N} · ${m.title}`;
@@ -115,6 +116,8 @@
 
   // A look draws itself inside the frame. The bar only tells it which moment to show.
   const toLook = (msg) => frame.contentWindow && frame.contentWindow.postMessage({ source: 'valueit-bar', ...msg }, '*');
+  $('arrival-pieces').onclick = () => toLook({ type: 'arrival', mode: 'pieces' });
+  $('arrival-whole').onclick = () => toLook({ type: 'arrival', mode: 'whole' });
   function showLook() {
     const m = state.moment + 1;
     if (frame.dataset.look !== state.look) {

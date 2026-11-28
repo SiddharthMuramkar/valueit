@@ -12,6 +12,8 @@ The owner saw the first rough pass, chose its layout (A: Chatbot on the left, Wi
 
 So: the same screen, the same nine moments, the same words, as a finished look. Three looks are built, each a different direction, each in its own folder. The owner reacts to them and picks.
 
+The owner subsequently decided that the Chatbot builds every Widget live from Building blocks, following the Lesson Plan’s Widget brief. Moment 1 shows the first Widget already on screen. Moment 3 lets the owner replay two ways to show a build in progress. [Decision on live Widgets](https://github.com/SiddharthMuramkar/valueit/issues/14#issuecomment-7238372045)
+
 ## The bar
 
 Ten out of ten means: put it on the landing page of the best-designed product you know and nobody blinks. Five is a competent template. The first rough pass is a two.

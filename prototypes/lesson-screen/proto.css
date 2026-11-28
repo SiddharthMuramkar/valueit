@@ -47,6 +47,9 @@ body {
 .pb-group { display: inline-flex; align-items: center; gap: 6px; }
 .pb-group button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #3a3d43; background: #1e2125; color: #fff; font-size: 18px; line-height: 1; cursor: pointer; }
 .pb-group button:hover { background: #2c3036; }
+#arrival-preview { margin-top: 6px; }
+#arrival-preview[hidden] { display: none; }
+#arrival-preview button { width: auto; padding-inline: 10px; font: inherit; }
 .pb-k { color: #a9a59b; }
 .pb-label { min-width: 160px; text-align: center; font-weight: 650; }
 .pb-label.look { min-width: 130px; }

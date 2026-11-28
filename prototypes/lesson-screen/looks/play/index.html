@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playful blocks · ValueIt Lesson prototype</title>
+<link rel="stylesheet" href="play.css">
+</head>
+<body>
+<header class="mast">
+  <div class="brand"><span class="stamp" aria-hidden="true"></span>ValueIt</div>
+  <div class="lesson"><strong>Accounting 101 · Lesson 1</strong><span>What a company owns, owes and earns</span></div>
+  <div class="progress"><ol aria-label="Lesson progress"></ol><span></span></div>
+  <button class="notes">Notes (3)</button>
+</header>
+<main>
+  <section data-pane="chat" aria-label="Lesson conversation">
+    <div class="scroll"></div>
+    <form class="composer">
+      <button type="button" class="stuck">I'm stuck</button>
+      <label><input aria-label="Message the Chatbot" placeholder="Ask, or answer the Chatbot"></label>
+      <button class="send" type="submit">Send <span aria-hidden="true">↑</span></button>
+    </form>
+  </section>
+  <section data-pane="widget" aria-label="Widget"></section>
+</main>
+<dialog><div class="drawer"><h2>Notes</h2><button class="close">Close</button></div><div class="note-list"></div></dialog>
+<script src="../../lesson.js"></script><script src="../../widgets.js"></script><script src="../bridge.js"></script><script src="play.js"></script>
+</body>
+</html>

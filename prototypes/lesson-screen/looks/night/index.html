@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night glow · Lesson screen prototype</title>
+<link rel="stylesheet" href="night.css">
+</head>
+<body>
+<header class="top">
+  <div class="course"><span class="brand" aria-hidden="true"><i></i><i></i><i></i></span><div><span class="meta" id="course"></span><b id="lesson"></b></div></div>
+  <div class="top-right"><div class="progress"><div id="steps"></div><span id="idea"></span></div><button class="quiet-btn" id="notes" type="button"></button></div>
+</header>
+<main>
+  <section class="conversation" data-pane="chat" aria-label="Lesson conversation">
+    <div class="history" id="history" tabindex="0" role="region" aria-label="Conversation history"></div>
+    <form class="compose"><button id="stuck" type="button">I'm stuck</button><div class="message"><input id="message" aria-label="Message the Chatbot" placeholder="Ask, or answer the Chatbot" autocomplete="off"><button id="send" type="submit" aria-label="Send">↑</button></div></form>
+  </section>
+  <section class="stage" data-pane="widget" aria-label="Widget" id="stage"></section>
+</main>
+<dialog id="notebook"><div class="dialog-head"><h2>Notes</h2><button type="button" class="quiet-btn" onclick="this.closest('dialog').close()">Close</button></div><ul></ul></dialog>
+<script src="../../lesson.js"></script>
+<script src="../../widgets.js"></script>
+<script src="../bridge.js"></script>
+<script src="night.js"></script>
+</body>
+</html>

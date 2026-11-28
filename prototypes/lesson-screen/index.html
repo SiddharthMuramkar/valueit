@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · ValueIt Lesson screen</title>
+<link rel="stylesheet" href="proto.css">
+</head>
+<body>
+<!--
+  PROTOTYPE, throwaway. Not production code. No build step: open this file in a browser.
+
+  Question (ticket "How the Lesson screen looks and moves"):
+  what does a Student see on a landscape screen during a Lesson, and how does it move?
+
+  Plan: three versions of the Lesson screen on this one page, switched with ?variant=A|B|C,
+  walked through nine made-up moments of one Lesson with ?moment=1..9.
+  All Lesson content is made up.
+-->
+<div id="viewport">
+  <div id="scaler">
+    <div id="screen">
+      <div id="app"></div>
+      <div id="kb" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+
+<div id="protobar">
+  <div class="pb-row">
+    <span class="pb-tag">PROTOTYPE · made-up content</span>
+    <div class="pb-group">
+      <button id="v-prev" type="button" aria-label="Previous version">‹</button>
+      <span id="v-label" class="pb-label"></span>
+      <button id="v-next" type="button" aria-label="Next version">›</button>
+    </div>
+    <div class="pb-group">
+      <button id="m-prev" type="button" aria-label="Previous moment">‹</button>
+      <span id="m-label" class="pb-label wide"></span>
+      <button id="m-next" type="button" aria-label="Next moment">›</button>
+    </div>
+    <label class="pb-group">Screen
+      <select id="s-sel"></select>
+    </label>
+    <label class="pb-group"><input type="checkbox" id="kb-chk"> iPad keyboard up</label>
+  </div>
+  <div class="pb-says"><span id="pb-state"></span><b id="pb-version"></b> <span id="pb-says"></span></div>
+</div>
+
+<script src="lesson.js"></script>
+<script src="widgets.js"></script>
+<script src="variant-a.js"></script>
+<script src="variant-b.js"></script>
+<script src="variant-c.js"></script>
+<script src="harness.js"></script>
+</body>
+</html>

@@ -10,16 +10,16 @@ Two decisions from the owner on 2026-11-28 shape the answer: every Widget is bui
 
 ### Recommendation
 
-**Do not use CopilotKit. Wire A2UI directly with Google's three official packages, and spend the effort on ValueIt's own catalog of Widget building blocks.** The earlier one-line dismissal was too quick: CopilotKit is a serious option, and Google's own A2UI tools are built with it. The conclusion still holds after a proper look, and it holds on Widget quality first.
+**Use the official A2UI packages directly and invest in ValueIt's Building blocks.** This route supports the planned calculations and shared inputs with the SDKs ValueIt already chose. The recommendation concerns integration fit. Teaching quality awaits the owner's live Widget prototype. [Do live-built Widgets look and teach well enough?](https://github.com/SiddharthMuramkar/valueit/issues/28)
 
-The six facts it rests on:
+The recommendation rests on the following findings from package and source inspection.
 
-1. **A Widget's look comes from the catalog, not from the wiring.** A2UI 1.0 carries no colours, fonts or styling at all. A Widget looks exactly as good as the building blocks the app owns. CopilotKit does not make them look better. It offers a ready set of 69, and its own docs call their default look "neutral".
-2. **CopilotKit cannot carry ValueIt's finance maths the way ValueIt planned.** The plan is "our maths, the AI's wiring": present value, cost of equity and the rest are written once as checked code, and the AI only connects a slider to a formula to a chart. Google's renderer supports that. CopilotKit's catalogs accept only a fixed list of built-in functions as live values. What it offers instead is a function called `calc`, where the AI writes the arithmetic itself.
-3. **In CopilotKit's A2UI 1.0 engine, the Chatbot cannot change a value the Student has touched.** Its docs say so plainly. ValueIt's glossary says the opposite of the Chatbot: it "sees what the Student sets on a Widget and can change it". In official A2UI the Chatbot moves a slider with one small message.
-4. **CopilotKit does not fit "OpenAI's own SDK".** Its built-in AI layer runs on Vercel's AI SDK. To keep OpenAI's own SDK we would write the translator between OpenAI and CopilotKit by hand, which is the very work CopilotKit is meant to save.
-5. **Saved Widgets would need CopilotKit's hosted service or code of our own either way.** Without the service, CopilotKit's built-in stores keep history in the memory of one running copy of the app, or in one local file. Neither holds on Vercel. The service means a new account, a new key and a bill.
-6. **It is heavy, and its A2UI 1.0 support is marked experimental.** Its server package has 45 direct dependencies against 2 for Google's. Its 1.0 engine "can change", follows an October draft of the specification, and leaves parts of 1.0 out.
+1. **ValueIt owns the look of its Building blocks.** A2UI 1.0 removes the surface-level theme field. Custom catalogs can still carry design tokens and expose visual properties. The renderer and the Building blocks determine how these appear on screen. CopilotKit offers 69 ready pieces with a default theme. The research included no visual comparison of working ValueIt Widgets.
+2. **The two CopilotKit integrations differ on finance calculations.** ValueIt needs the model to bind a slider to a checked calculation and use its result in a chart. Official A2UI documents custom reactive functions. CopilotKit 1.90.2's experimental Components and surfaces engine limits live value expressions to built-ins. Its separate A2UI renderer accepts a supplied catalog. Whether that route runs ValueIt's custom functions end to end is untested.
+3. **Input ownership matters.** The experimental CopilotKit engine protects a value that the Student has edited. The A2UI protocol lets the Chatbot send an update to that path, as the glossary requires. The separate CopilotKit renderer's behavior after a Student edit was never exercised.
+4. **The direct route fits OpenAI's SDK.** CopilotKit's built-in agent uses Vercel's AI SDK. A custom agent using OpenAI's SDK can instead produce AG-UI events, adding integration work.
+5. **Both routes need durable storage on Vercel.** CopilotKit offers a hosted service or a custom runner backed by a shared datastore. ValueIt plans to keep conversations and Widgets in Neon and would own the persistence code on the direct route.
+6. **Dependency counts and maturity differ.** The inspected CopilotKit server package declares 45 direct dependencies and the inspected A2UI agent declares two. The experimental Components and surfaces engine implements a documented subset of A2UI v1.0. These counts provide no bundle-size or performance measurement.
 
 ### What CopilotKit and AG-UI are
 
@@ -37,11 +37,11 @@ The six facts it rests on:
 | Ready building blocks | 69, including a table, a chart and a formula view | 18 plain basics. ValueIt builds its own, which a first-class look needs anyway |
 | A Widget in a fixed part of the page | Documented for the experimental engine | Yes, natively |
 | Saved conversations and Widgets | The hosted service, or our own storage code | Our own storage code, in the database ValueIt already has |
-| Our own maths as live values | No | Yes |
-| The Chatbot overrides what the Student set | No, in the 1.0 engine | Yes |
+| Our own maths as live values | Experimental Components engine accepts built-ins only. Separate A2UI renderer accepts a supplied catalog, end to end untested | Documented custom reactive functions |
+| Chatbot changes an input after the Student edits it | Experimental engine protects edited values. Separate renderer untested | Protocol supports an update to the input's path |
 | Connecting many AI frameworks | Yes | Not needed: ValueIt calls one model |
 
-### The wiring
+### Proposed wiring for ValueIt
 
 1. **The screen.** The Lesson screen holds ValueIt's own chat pane and the Widget pane side by side. Google's React renderer (`@a2ui/react`) draws the Widget pane from ValueIt's catalog. As the earlier research found, this part of the page draws only in the browser.
 2. **A turn.** When the Student sends a message or presses a button on a Widget, the browser posts it to one route in the Next.js app, together with what the Student has currently set on the Widget.
@@ -75,7 +75,7 @@ Existing catalogs were checked. None is good enough to adopt:
 
 What the official packages give:
 
-- **Checking.** Every Widget is checked before it reaches the browser: unknown pieces, missing required settings, a piece that points at nothing, a misspelled function. The check also knows what is already on screen, so a change to a Widget that does not exist is refused.
+- **Checking.** The app can validate output against its catalog and current surface state. To show only a completely checked Widget, buffer the whole candidate and check the model's completion status before publishing or saving it. Streaming can expose an accepted block before a later block fails. Structural checks cannot judge whether the figures and lesson are correct.
 - **Repair.** If the whole reply is checked before anything is shown, a failed Widget is thrown away cleanly and the model is asked again with the error. If it is shown as it streams, the valid part stays on screen and is repaired in place or removed.
 - **Examples.** Example Widgets are written once, checked against the catalog by the package, and put into the model's instructions. This is where ValueIt's house style lives.
 - **Limiting size.** The catalog can be trimmed per Lesson, so the model sees only the pieces that Lesson needs. There is no built-in cap on how big a Widget may be. ValueIt sets its own: a limit on the length of the reply, and a simple count of pieces after the check. A reply cut off by the length limit can look finished, so the app must ask OpenAI whether the reply was cut.
@@ -104,7 +104,7 @@ Google's roadmap promises pieces that are themselves described as data. That is 
 
 ### Against the stack test
 
-- **Widget quality.** Decided above: the direct route gives the Widgets two things CopilotKit lacks, and gives up nothing a Widget needs.
+- **Widget quality.** The direct route documents both custom reactive calculations and updates to existing inputs. CopilotKit's experimental engine restricts those operations. The separate CopilotKit renderer and the teaching quality of a real Widget still need runtime evidence.
 - **Lean and simple.** Direct: three Google packages. CopilotKit: its browser and server packages bring 31 and 45 direct dependencies, among them Vercel's AI SDK, three AI vendors' adapters, a GraphQL server and an analytics client.
 - **Run by a vendor, so a fault is the vendor's to fix.** Neither route is a service. Both are code inside ValueIt's app. On the direct route the glue (the stream, the retry, saving and replaying, the chat pane) is ValueIt's to keep working. It is small, and Google's guide shows each part. CopilotKit would own more of that glue, and it is the only one of the two that sells support. Its hosted service is vendor-run, but only for history, memory and analytics.
 - **Easy for AI coding agents.** Both publish instructions for coding agents. CopilotKit has two generations of its API and two separate A2UI engines, and its examples default to Vercel's AI SDK, so an agent has more ways to write the wrong thing and to drift from the "OpenAI's own SDK" rule.
@@ -164,8 +164,8 @@ All sources below were read on 2026-11-28 unless a line gives another date.
 - CopilotKit route 2: a function ValueIt declares runs "when a component calls an event", that is, on a click. "The functions of the A2UI 1.0 basic catalog are built in", and "A2UI 1.0 has no arithmetic, so CopilotKit adds two catalog functions", `calc` and `series`. Source: [State and actions](https://docs.copilotkit.ai/generative-ui/components/state-and-actions).
 - Confirmed in the published 1.90.2 source: a function used as a value must be one of the built-in names, or the Widget is rejected with `"<name>" is not a basic function`. Source: [validate-operation.ts](https://cdn.jsdelivr.net/npm/@copilotkit/shared@1.90.2/src/generative-ui/validate-operation.ts), [basic-functions.ts](https://cdn.jsdelivr.net/npm/@copilotkit/shared@1.90.2/src/generative-ui/basic-functions.ts), and the browser side in [`@copilotkit/core`](https://cdn.jsdelivr.net/npm/@copilotkit/core@1.90.2/dist/generative-ui/index.mjs).
 - `calc` takes an expression the AI writes, such as `"seats * 29"`. There is "no function that maps over a list". A sum over many years, such as the present value of a lease, cannot be written in it. Source: [markdown mode, "Limits"](https://docs.copilotkit.ai/generative-ui/components/markdown-mode).
-- CopilotKit route 1: its catalog builder takes building blocks only and passes on only the standard functions. Source: [create-catalog.mjs in 1.90.2](https://cdn.jsdelivr.net/npm/@copilotkit/a2ui-renderer@1.90.2/dist/react-renderer/create-catalog.mjs).
-- What remains possible in CopilotKit: put a whole calculation inside one custom building block. The AI could then place that block but could no longer connect any slider to any formula to any chart.
+- CopilotKit route 1 has two entry points. Its catalog builder supplies standard functions when requested. Its provider also accepts a supplied catalog and passes it to the message processor. The v1.0 schema helper serializes that catalog's full definition into model context. These interfaces leave a route for custom calculations that has yet to be tested with ValueIt's model and components. [Catalog builder](https://cdn.jsdelivr.net/npm/@copilotkit/a2ui-renderer@1.90.2/dist/react-renderer/create-catalog.mjs) · [Provider](https://cdn.jsdelivr.net/npm/@copilotkit/a2ui-renderer@1.90.2/dist/react-renderer/core/A2UIProvider.mjs) · [Catalog adapter](https://cdn.jsdelivr.net/npm/@copilotkit/a2ui-renderer@1.90.2/dist/react-renderer/catalog-utils.mjs)
+- Another option is to implement a particular calculation inside a custom Building block. This couples that calculation to the block and limits how the model can compose it with other controls.
 
 ### 5. The Chatbot changing what the Student set (read 2026-11-28)
 
@@ -220,7 +220,7 @@ Both projects are busy: about 500 open issues and pull requests each. Source: [C
 
 ### 11. What decides look and movement (read 2026-11-28)
 
-- 1.0 took styling out of the protocol: "Removes rigid theme properties ... to defer visual styling entirely to the target framework's native theme. A v1.0 `createSurface` that carries `theme` is invalid." Source: [v1.0 specification](https://a2ui.org/specification/v1.0-a2ui/), [evolution guide](https://a2ui.org/specification/v1.0-evolution-guide/).
+- Version 1.0 removed the fixed theme field from `createSurface`. The specification's custom catalog example defines a colour property and its extensions can carry design tokens. ValueIt chooses which visual options its own renderer implements. [v1.0 specification](https://a2ui.org/specification/v1.0-a2ui/) · [Evolution guide](https://a2ui.org/specification/v1.0-evolution-guide/)
 - A custom building block is an ordinary React component, styled with the app's own CSS. The standard 18 are web components themed through `--a2ui-*` variables. Source: [`@a2ui/react` README, "Styling and CSS Modules"](https://github.com/a2ui-project/a2ui/blob/main/typescript/renderers/react/README.md), [client integration guide](https://a2ui.org/guides/client-integration/).
 - Layout rules: a building block can declare `allowedParents` and `allowedChildren`, and the renderer rejects a Widget that breaks them. Source: [defining a catalog, "Child slots and layout constraints"](https://a2ui.org/guides/defining-a-catalog/).
 - House rules: a 1.0 catalog carries written `instructions` that are added to the model's instructions. Source: [defining a catalog, "Prompt instructions and catalog metadata"](https://a2ui.org/guides/defining-a-catalog/).
@@ -272,8 +272,8 @@ Both projects are busy: about 500 open issues and pull requests each. Source: [C
 2. **What is in the catalog?** The map's "Widget building blocks" item. It is now the centre of the product, and it waits on [The first Accounting 101 Lesson Plan](https://github.com/SiddharthMuramkar/valueit/issues/22).
 3. **Reveal a Widget whole, or let it build piece by piece?** A matter for the owner's eye in [How the Lesson screen looks and moves](https://github.com/SiddharthMuramkar/valueit/issues/14).
 4. **How the server remembers what is on screen between messages.** The app does not keep memory between requests on Vercel, so the record has to be rebuilt from the saved messages each time. The function for it exists. It needs a small prototype.
-5. **One catalog definition for both server and browser,** without pulling React into the server. Carried over from the earlier research.
-6. **Zod 3 or Zod 4.** The app-stack research lists Zod 4. Google's A2UI packages, and CopilotKit's, require Zod 3. For [Lock the stack](https://github.com/SiddharthMuramkar/valueit/issues/17).
+5. **One catalog definition for server and browser.** Verify the app can share that definition while keeping React in the browser bundle.
+6. **Version compatibility.** The inspected official renderer 0.16.1 declares a Zod peer of `^3.25.76`. Use this constraint when pinning dependencies during application setup. [Published manifest](https://registry.npmjs.org/@a2ui/react/0.16.1)
 7. **What a Student sees when a Widget fails twice,** and the wording of the Chatbot's fallback.
 8. **Names for catalog versions,** so a Widget saved today still opens after the catalog changes.
 
@@ -281,8 +281,8 @@ Both projects are busy: about 500 open issues and pull requests each. Source: [C
 
 - **Nothing was run.** The claims about CopilotKit's limits come from its docs and its published source. The claims about the official route come from Google's docs and published packages.
 - **How CopilotKit's ready pieces look and move in real use.** One docs page was seen as a picture. Whether anything looks "first-class" cannot be settled from documents.
-- **Whether a catalog built with Google's own tools, with ValueIt's functions in it, could be handed to CopilotKit's route 1** and reach the model's instructions. CopilotKit's own builders do not offer this. Not tried.
-- **Whether route 1 lets the Chatbot overwrite a value the Student set.** It is built on Google's core, so it probably follows the official rule. Not checked.
+- **A custom finance function through route 1.** The source shows that a supplied catalog reaches both the message processor and the v1.0 schema given to the model. There is no ValueIt run that binds a slider to that function and renders the recalculated chart.
+- **A Chatbot edit after a Student edit on route 1.** Exercise both edits on the same input before judging compatibility with the Lesson.
 - **CopilotKit's exact prices beyond the headline figures.** The pricing page and the docs name the plans differently, and the hosted pay-as-you-go button reads "Get Early Access".
 - **How well CopilotKit's built-in repair works against a hand-written one.** No measurements exist for either.
 - **Any figure for OpenAI models writing A2UI.** CopilotKit's quick start runs an OpenAI model, which shows that it works, not how well.

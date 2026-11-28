@@ -133,3 +133,111 @@ Look at your own screenshots (the Read tool shows a PNG) the way a hostile desig
 ## How it is judged
 
 Each from 1 to 10: first-glance awe; typography; alignment and spacing; colour; the Widget (delight and interactivity); motion; clarity of the idea being taught; every screen size including keyboard-up; finish (states, edge cases, nothing glitchy, the kit honest).
+
+---
+
+# Second reaction: Playful blocks, made professional (2026-11-28)
+
+The owner tried the three looks and said, in short:
+
+- Playful blocks is the one: "really good". Keep what it does.
+- Now make it professional: minimalistic, dark, with royal blue accents.
+- "The best fonts to read", and bold type for the thing the Student should focus on.
+- Clean and minimal, yet it should look as if a team of high-end software developers made it: really good layouts, well thought out UI and UX.
+- Really good to look at and interactive. Every single aspect properly thought through.
+
+So there is a fourth look. Everything above in this brief still holds (layout, placements, words, the nine moments, the product truths, how it is built, done means) except where this section says otherwise. Read `play/` first: it is the behaviour the owner liked. A dark recolour of it fails; so does anything that loses its blocks.
+
+## What stays from Playful blocks
+
+- The amounts block: two stacks of solid blocks with real depth, one block per amount, standing on a floor, on one shared scale, with a bold total over each stack and an equals sign between them. A block carries its name when it has room.
+- Grab a block itself to change it. Every movable block also has a labelled range control. The Cart never moves and never looks grabbable.
+- The ledger under the stacks that repeats every label and amount.
+- Big, tight, bold type for the idea title, the Widget title and the two totals.
+- The whole kit and both Widgets drawn by one routine from `P.defs`.
+
+## What changes
+
+- Light lilac becomes dark. The violet accent becomes royal blue.
+- The quirky display face becomes a reading-first family.
+- The cartoon tells go: a dark outline around every face, tilted icon squares, hard offset shadows, candy gradients.
+- Fewer boxes. Play puts the board, the ledger, each slider and the question in separate bordered cards. Here spacing, alignment and a few hairlines do that work.
+
+## Minimal: the budget
+
+- **One accent.** Royal blue marks what the Student can act on and what is selected or focused. Nothing else in the frame around the Widget is coloured. The data palette lives only inside a Widget and in the Chatbot's words about those amounts.
+- **Surfaces.** At most three tones of one blue-black: canvas, raised, sunken. No pure black and no pure white; reading text is an off-white.
+- **Lines.** A hairline only where two things would otherwise run together. No box around something that space already separates.
+- **No decoration.** No glow, no neon, no glass blur, no gradient for its own sake. Depth is allowed where it carries meaning: the blocks are objects, and a sheet lies over the page.
+- **Icons.** Simple line icons, one stroke weight, inline SVG, `currentColor`. No emoji.
+- **Motion.** Quick and physical. Nothing loops except the thinking state, and that gently.
+
+## Type
+
+Inter, variable, with its optical-size axis: the official 4.1 build, `InterVariable.woff2`, SIL Open Font License 1.1. The file and its licence come from the `inter-ui` package, version 4.1.0 (`variable/InterVariable.woff2`, `LICENSE.txt`); the copies are in `royal/fonts/`. The smaller build on Fontsource leaves out the arrows and the alternates, so it is not the one to use.
+
+It was chosen by looking. Twelve reading faces were set in this screen's real column on a dark ground at 1× and 2×: Inter, Geist, Atkinson Hyperlegible Next, IBM Plex Sans, Source Sans 3, Hanken Grotesk, Figtree, Mona Sans, Public Sans, Instrument Sans, Manrope, Lexend. Inter read most evenly at 17 px, and its display cut at heavy weights gives the tight, confident headline the owner liked in Playful blocks without the quirks.
+
+- `font-optical-sizing: auto`, so small text gets the sturdier text cut and headlines the display cut. `font-synthesis: none`. No italics.
+- Reading text at a regular weight: try 400 to 460 on the dark ground and judge by eye at 1× (light text on dark renders thinner on some systems and fatter on others).
+- **Bold is for focus.** Heavy weights (650 to 800) are reserved for what the Student should look at next: the idea title, the Widget title, the two totals, the question, the primary button, the word being taught. If everything is bold, nothing is.
+- Tabular lining numerals on every amount (`font-variant-numeric: tabular-nums lining-nums`). This build has `ss01`, `cv05`, `cv08`, `case` and friends; use an alternate only if it makes text easier to read without looking odd.
+- This build draws every arrow and tick the script uses (→ ↗ ↑ ↓ ↳ ↕ ✓ ×), so no fallback font may appear anywhere on screen. `node tools/audit.mjs` lists the fonts in use.
+- Sizes follow the scaling rule in `README.md` (driven by width, never height; Chatbot text 16.5 to 18 px; lines 45 to 75 characters; the smallest text fixed, not below 12 px).
+
+## Colour
+
+- **Canvas:** a blue-black. Clearly dark, clearly not grey.
+- **Accent:** royal blue. A fill near `#4169e1` for the primary button, the selected state, the slider fill and the focus ring; white on it must reach 4.5 to 1. Small text and links on the canvas need a lighter tint of the same hue, because the fill colour itself does not reach 4.5 to 1 on a dark ground.
+- **Data palette:** five colours on dark. Left for Maya is the blue block, and blue is also the accent, so decide on purpose how the two relate and say so in your notes. The other four must be plainly different from it and from each other, for a colour-blind Student too; names on the faces and in the ledger carry the meaning as well, never colour alone. Professional, not candy: tune the five to similar lightness and strength (work in OKLCH) so no block shouts. A concept keeps its colour everywhere, in the Widget and in the Chatbot's words about it.
+- **Right and wrong:** right is a calm green with a tick and the word; wrong is kind, with a mark and "Not this one", never an alarm red.
+- **Contrast:** text 4.5 to 1 (3 to 1 when large), control edges and focus rings 3 to 1.
+
+## Layout and UX: each of these is a decision, not an accident
+
+- Shared edges. The brand, the idea title, the Chatbot's words and the message box share one left edge. The Widget title, the stacks, the ledger and the controls share another. The top bar lines up with the panes under it.
+- One focal point per moment, made with weight and position, not with more colour. On the Widget pane the order is title, totals, blocks, ledger, controls; at Test intuition the question becomes the loudest thing and the chart compacts.
+- The conversation is a document, not a chat app. The Chatbot's words are plain text on the canvas; the Student's words are set apart quietly.
+- Empty space at moment 1 is a feature.
+- "I'm stuck" is always findable and never louder than Send.
+- Notes is a sheet with its own design: a title, what was saved, the Student's own line.
+- Progress in the top bar shows done, now and later without relying on colour alone.
+
+## Interaction: the owner asked for interactive
+
+Every control needs hover, keyboard focus, pressed and disabled states that look different from each other.
+
+1. **Direct manipulation.** A grabbed block follows the finger with no lag and settles with weight on release. Linked blocks move in lockstep (the loan: machine and bank debt; own money: cash and Maya's share), and the blue block visibly stays put when the loan moves. While dragging, show the amount and how much it changed.
+2. **One teacher.** The Chatbot's words about an amount carry that amount's colour. Hovering, focusing or tapping such a word lights its block and its ledger row on the right. Hovering a block or a ledger row lights its partners. All of it works by touch.
+3. **The Chatbot's hand.** When it sets an amount the blocks move by themselves from the old value to the new, the numbers count, and a line says what it did. When it points, the control is marked "The Chatbot is pointing here" and draws the eye once, not forever.
+4. **A Widget being built.** Stepping to moment 3 should look assembled. The bar's two replays (**Piece by piece**, **All at once**) hide and show every `[data-build-part]` and swap the text of the pane's first `h2` (see `bridge.js`). Hidden parts keep their space so nothing jumps, and the reveal may animate.
+5. **Thinking.** Calm, alive, honest about the half minute. The Widget stays usable. The prototype stays at moment 2 until the owner moves on, so anything that counts or moves must still look right after five minutes.
+6. **Tabs.** A real handover between Widgets. Each keeps its slider values while hidden. Arrow keys, Home and End.
+7. **Notes.** "Save as Note" flips to "Saved to Notes", the count in the top bar answers, and the sheet lists what was saved.
+8. **Keyboard and touch.** Everything reachable in a sensible order with a visible royal blue focus ring. Escape closes the sheet. Targets at least 44 px. `touch-action` set so dragging a block never scrolls the page.
+
+## Hooks the tools rely on
+
+- Each block: `data-block="cash|cart|machine|owes|equity"`. Each coloured word in the Chatbot's text: `data-concept` with the same key. Each total: `data-total="left|right"`.
+- `data-build-part="amounts"` on the chart and `data-build-part="controls"` on what arrives after it. The Widget title is the pane's first `h2`.
+- Native `<input type="range">` for every control, its `aria-label` the control's label from `P.defs`.
+- Button names keep the product words: Send, I'm stuck, Save as Note, Saved to Notes, Go on: What it earns, Done, Close, `Notes (3)`, and the marker starts "On the right:". Notes opens in a `<dialog>`.
+
+## Checks for this look
+
+Run from `prototypes/lesson-screen/`, like the tools above; each starts its own headless browser. The look must be listed in `looks.js`.
+
+- `node tools/drive.mjs chrome <look>` and `… firefox <look>`: uses the look the way a Student would, 64 checks, all must pass.
+- `node tools/arrival.mjs chrome <look>` and `… firefox <look>`: both arrival replays in the bar.
+- `node tools/panel.mjs <look> <outDir>`: one fixed set of pictures (every moment and size, drags frame by frame, hover, focus, pressed, Notes, right and wrong, reduced motion, the replays). `--only stills|motion|states|bar` for a part.
+- `node tools/modes.mjs <look> <outDir>`: the look as a colour-blind Student sees it, in forced colours, with more contrast, with wider text spacing.
+- `node tools/ff-shots.mjs <look> <outDir>`: the same moments in Firefox, to hold beside Chrome's.
+- `node tools/sizes.mjs <look>`: the type sizes, line length and chart height at the six screen sizes, as a table.
+
+## Judged on
+
+The list at the end of the brief, and two more. Does it honour the owner's words: minimal, dark, royal blue accents, easy to read, bold where the Student should focus, professional, interactive, every detail considered? Does it keep what the owner liked in Playful blocks?
+
+## Outcome
+
+Three takes on this section were started side by side: the most reduced one, one that treats the Widget as a lit object in a quiet dark room, and one with a measured scale and a level line across both stacks. The owner looked in while they were being built and chose the second. It is `royal/`, named **Royal blocks**, and it is the look for the Lesson screen. The other two were stopped unfinished and are not kept. [Its notes](royal/NOTES.md)

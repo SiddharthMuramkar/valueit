@@ -1,0 +1,822 @@
+/* PROTOTYPE, throwaway. "Royal blocks": the Widget is a lit object in a quiet dark room.
+   The first block below holds every token. It is the part the real product copies. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Colour: three tones of one blue-black ------------------------------------------ */
+  --canvas: #0a0f1c;        /* the room: top bar and conversation */
+  --raised: #121929;        /* the stage: Widget pane, the Notes sheet, the Student's words */
+  --sunken: #060a14;        /* wells: text fields, slider grooves */
+
+  /* ---- Colour: ink --------------------------------------------------------------------- */
+  --ink: #edf0f7;           /* reading text, an off-white */
+  --ink-quiet: #9da7bd;     /* captions, labels, what is not the point right now */
+  --line: #232b3e;          /* hairlines between things that would run together */
+  --edge: #5f697e;          /* the edge of a control: 3 to 1 on canvas and on raised */
+  --dot: #3a445a;           /* the dots of the floor */
+  --wash: rgb(237 240 247 / 0.06);   /* hover on a quiet control */
+  --wash-strong: rgb(237 240 247 / 0.11);
+
+  /* ---- Colour: the one accent, royal blue ---------------------------------------------- */
+  --accent: #3d63db;        /* fills: primary button, slider, selected, focus ring */
+  --accent-hi: #4d73ea;     /* the same fill under the pointer */
+  --accent-lo: #3152c0;     /* the same fill pressed */
+  --accent-text: #9bb6ff;   /* small text and links on dark: the same hue, lighter */
+  --accent-wash: rgb(61 99 219 / 0.16);
+  --on-accent: #f6f8fd;
+
+  /* ---- Colour: data. Face, lit top, shaded side, and the tint used for words ----------- */
+  /* Cool pair = Maya's own money. Warm pair = the loan. The Cart never changes: no hue.   */
+  --c-equity: #3d63db;  --c-equity-top: #7a9aeb;  --c-equity-side: #213a86;  --c-equity-text: #9bb6ff;
+  --c-cash: #0f7c55;    --c-cash-top: #6fa88c;    --c-cash-side: #064a32;    --c-cash-text: #76d6ad;
+  --c-machine: #a8408f; --c-machine-top: #c982b5; --c-machine-side: #652456; --c-machine-text: #eba4d6;
+  --c-owes: #b73c1c;    --c-owes-top: #d5826c;    --c-owes-side: #6f210d;    --c-owes-text: #f9a78d;
+  --c-cart: #5e6a79;    --c-cart-top: #929aa5;    --c-cart-side: #343b45;    --c-cart-text: #b9c5d5;
+  --on-data: #f6f8fd;
+
+  /* ---- Colour: right and wrong --------------------------------------------------------- */
+  --right: #8fd98f;
+  --right-wash: rgb(143 217 143 / 0.1);
+  --right-edge: #4f9a5a;
+
+  /* ---- Type: Inter, one family --------------------------------------------------------- */
+  --font: "Inter", "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* size, driven by width and never by height */
+  --fs-micro: 0.78125rem;                                         /* 12.5px, fixed */
+  --fs-ui: 0.875rem;                                              /* 14px, fixed */
+  --fs-body: clamp(1.03125rem, 0.7716rem + 0.3846vw, 1.125rem);   /* 16.5 to 18 */
+  --fs-lead: clamp(1.125rem, 0.6925rem + 0.641vw, 1.28125rem);    /* 18 to 20.5 */
+  --fs-title: clamp(1.5rem, 0.4611rem + 1.5385vw, 1.875rem);      /* 24 to 30 */
+  --fs-total: clamp(2rem, 0.2692rem + 2.5641vw, 2.625rem);        /* 32 to 42 */
+  --fs-display: clamp(2.375rem, 0.298rem + 3.077vw, 3.125rem);    /* 38 to 50 */
+  /* weight: bold is for the thing to look at next */
+  --w-text: 430;
+  --w-ui: 520;
+  --w-strong: 640;
+  --w-focus: 740;
+  /* line height and letter spacing, per step */
+  --lh-display: 1.04;  --ls-display: -0.036em;
+  --lh-title: 1.1;     --ls-title: -0.028em;
+  --lh-total: 1;       --ls-total: -0.035em;
+  --lh-lead: 1.28;     --ls-lead: -0.014em;
+  --lh-body: 1.6;      --ls-body: -0.004em;
+  --lh-ui: 1.35;       --ls-ui: -0.003em;
+  --lh-micro: 1.3;     --ls-micro: 0.004em;
+  --measure: 31em;                                                /* about 60 characters; the longest line near 75 */
+
+  /* ---- Space: one scale, 4px base ------------------------------------------------------ */
+  --s1: 0.25rem;  --s2: 0.5rem;  --s3: 0.75rem;  --s4: 1rem;  --s5: 1.5rem;  --s6: 2rem;  --s7: 3rem;  --s8: 4rem;
+  --gutter: clamp(1.5rem, 2.7vw, 2.5rem);      /* page edge, both panes */
+  --target: 2.75rem;                           /* 44px: the least a finger gets */
+
+  /* ---- Corners: they nest -------------------------------------------------------------- */
+  --r1: 0.25rem;   /* swatches, chips */
+  --r2: 0.5rem;    /* buttons, fields */
+  --r3: 0.75rem;   /* answers, the Student's words */
+  --r4: 1rem;      /* the sheet */
+  --pill: 62rem;
+
+  /* ---- Depth: only where it means something -------------------------------------------- */
+  --depth: 0.75rem;                            /* how far a block reaches back */
+  --rise: calc(var(--depth) * 0.577);          /* the same, seen from the front (30 degrees) */
+  --shadow-contact: 0 0.5rem 0.75rem -0.25rem rgb(0 0 0 / 0.55);
+  --shadow-sheet: -1.5rem 0 3rem rgb(2 4 10 / 0.5);
+  --shadow-chip: 0 0.375rem 1rem rgb(2 4 10 / 0.55);
+
+  /* ---- Motion: quick and physical ------------------------------------------------------ */
+  --t-press: 90ms;
+  --t-fast: 140ms;
+  --t-base: 220ms;
+  --t-move: 340ms;
+  --t-slow: 400ms;
+  --stagger: 55ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in: cubic-bezier(0.5, 0, 0.9, 0.5);
+  /* a damped spring (ratio 0.66): lands a hair past, then settles */
+  --spring: linear(0, 0.014 1.8%, 0.064 4%, 0.16 6.8%, 0.382 11.8%, 0.626 17.3%, 0.774 21.3%, 0.883 25%, 0.962 28.7%, 1.021 33%, 1.055 38%, 1.062 44.5%, 1.004 70.3%, 0.997 92.5%, 1);
+  /* the same spring, nearly critical (ratio 0.85): no bounce to speak of */
+  --spring-soft: linear(0, 0.015 2.3%, 0.065 5%, 0.175 9%, 0.518 19.8%, 0.665 25.3%, 0.775 30.5%, 0.863 36.3%, 0.93 42.8%, 0.976 50.7%, 1.001 61.8%, 1.004 88.3%, 1);
+}
+
+/* Whole-pixel gutters where the browser can round, so shared edges land on the pixel grid. */
+@supports (width: round(down, 1.5px, 1px)) {
+  :root { --gutter: clamp(1.5rem, round(down, 2.7vw, 1px), 2.5rem); }
+}
+/* Browsers without linear() get a curve with the same character. */
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --spring: cubic-bezier(0.3, 1.35, 0.5, 1); --spring-soft: cubic-bezier(0.2, 0.9, 0.3, 1); }
+}
+
+@layer base, shell, chat, kit, sheet, motion, sizes;
+
+/* =========================================================================================
+   Base
+   ========================================================================================= */
+@layer base {
+  :where(html, body) { block-size: 100%; margin: 0; }
+  html { background: var(--canvas); overflow: hidden; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    block-size: 100vh;
+    block-size: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+    background: var(--canvas);
+    color: var(--ink);
+    font: var(--w-text) var(--fs-body) / var(--lh-body) var(--font);
+    letter-spacing: var(--ls-body);
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    font-kerning: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-wrap: break-word;
+    accent-color: var(--accent);
+    -webkit-tap-highlight-color: transparent;
+  }
+  :where(h1, h2, h3, p, ol, ul, dl, dd) { margin: 0; padding: 0; }
+  :where(ol, ul) { list-style: none; }
+  :where(h1, h2, h3) { font-size: inherit; font-weight: inherit; text-wrap: balance; }
+  :where(p, li) { text-wrap: pretty; }
+  :where(b, strong) { font-weight: var(--w-strong); }
+  :where(button, input, dialog, section, header, form) { box-sizing: border-box; }
+  :where(button, input) { font: inherit; letter-spacing: inherit; color: inherit; margin: 0; }
+  :where(button) { appearance: none; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; text-align: start; }
+  :where(button:disabled) { cursor: default; }
+  :where(a) { color: inherit; }
+  :where([hidden]) { display: none !important; }
+  ::selection { background: var(--accent); color: var(--on-accent); }
+
+  /* One focus ring everywhere: royal blue, two pixels, standing off the control. */
+  :where(a, button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  :where(.scroll, .panel):focus-visible { outline-offset: -2px; }
+  :where([tabindex="-1"]):focus { outline: none; }
+
+  .sr-only:where(:not(:focus-within, :active)) {
+    position: absolute !important;
+    inline-size: 1px; block-size: 1px;
+    margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+
+  .num { font-variant-numeric: tabular-nums lining-nums; }
+
+  .icon {
+    inline-size: 1rem; block-size: 1rem; flex: none;
+    fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* Buttons: a quiet one and the one primary. Hover lightens, press sinks, focus rings. */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+    min-block-size: var(--target); min-inline-size: var(--target);
+    padding-inline: var(--s4);
+    border-radius: var(--r2);
+    font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui);
+    white-space: nowrap;
+    transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), scale var(--t-press) var(--ease-out);
+  }
+  .btn.ghost { color: var(--ink); }
+  .btn.ghost:hover:not(:disabled) { background: var(--wash); }
+  .btn.ghost:active:not(:disabled) { background: var(--wash-strong); scale: 0.97; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); font-weight: var(--w-strong); }
+  .btn.primary:hover:not(:disabled) { background: var(--accent-hi); }
+  .btn.primary:active:not(:disabled) { background: var(--accent-lo); scale: 0.97; }
+  /* tonal: a real action that is not the step forward. Send wears it until there is something to send. */
+  .btn.tonal { background: var(--wash-strong); color: var(--ink); font-weight: var(--w-strong); }
+  .btn.tonal:hover:not(:disabled) { background: rgb(237 240 247 / 0.17); }
+  .btn.tonal:active:not(:disabled) { background: rgb(237 240 247 / 0.22); scale: 0.97; }
+  .btn:disabled { background: var(--line); color: var(--ink-quiet); }
+  .btn.ghost:disabled { background: none; }
+
+  /* A text field is a well: one tone down, with an edge you can find. */
+  .field { display: block; flex: 1; min-inline-size: 0; }
+  .field input {
+    inline-size: 100%; min-block-size: var(--target);
+    padding: var(--s2) var(--s4);
+    background: var(--sunken); color: var(--ink);
+    border: 1px solid var(--edge); border-radius: var(--r2);
+    font-size: var(--fs-ui); line-height: var(--lh-ui);
+    transition: border-color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+  }
+  .field input::placeholder { color: var(--ink-quiet); opacity: 1; }
+  .field input:hover { border-color: var(--ink-quiet); }
+  .field input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+}
+
+/* =========================================================================================
+   Shell: top bar and the two panes
+   ========================================================================================= */
+@layer shell {
+  .bar, main { display: grid; grid-template-columns: minmax(0, 48fr) minmax(0, 52fr); }
+  .bar { min-block-size: 3.75rem; border-block-end: 1px solid var(--line); background: var(--canvas); }
+  .bar-lesson, .bar-status { display: flex; align-items: center; min-inline-size: 0; padding-inline: var(--gutter); }
+  .bar-lesson { gap: var(--s5); }
+  .bar-status { justify-content: space-between; gap: var(--s4); padding-inline-end: calc(var(--gutter) - var(--s3)); }
+
+  .brand { font-size: 1.1875rem; font-weight: 760; letter-spacing: -0.04em; line-height: 1; }
+  .lesson-id { display: grid; min-inline-size: 0; font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); text-wrap: nowrap; }
+  .lesson-topic { font-size: var(--fs-micro); letter-spacing: var(--ls-micro); color: var(--ink-quiet); }
+  .lesson-title { font-weight: var(--w-ui); overflow: hidden; text-overflow: ellipsis; }
+
+  /* Progress: done is solid, now is long and blue, later is a broken line. Shape says it, then colour. */
+  .progress { display: grid; gap: 0.3125rem; min-inline-size: 0; }
+  .steps { display: flex; align-items: center; gap: var(--s1); block-size: 0.25rem; }
+  .steps li { inline-size: 1.25rem; block-size: 0.125rem; border-radius: var(--pill); background: var(--ink-quiet); transition: inline-size var(--t-move) var(--spring-soft), background-color var(--t-base) var(--ease-out); }
+  .steps li[data-state="later"] { background: repeating-linear-gradient(to right, var(--edge) 0 0.25rem, transparent 0.25rem 0.5rem); }
+  .steps li[data-state="now"] { inline-size: 2.5rem; block-size: 0.25rem; background: var(--accent); }
+  .steps li[data-state="done"] { background: var(--ink); }
+  .progress-now { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); color: var(--ink-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .progress-now b { color: var(--ink); font-weight: var(--w-ui); }
+  .progress-now .tick { display: inline-flex; vertical-align: -0.1875rem; margin-inline-start: var(--s1); color: var(--right); }
+
+  .notes-open { padding-inline: var(--s3); color: var(--ink); }
+  .notes-count { font-variant-numeric: tabular-nums lining-nums; display: inline-block; }
+
+  main { min-block-size: 0; }
+  [data-pane] { position: relative; min-inline-size: 0; min-block-size: 0; overflow: hidden; }
+  [data-pane="chat"] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  [data-pane="widget"] {
+    display: grid; grid-template-rows: auto minmax(0, 1fr);
+    background: var(--raised);
+    padding: 0 var(--gutter) var(--s5);
+  }
+}
+
+/* =========================================================================================
+   The conversation: a document, not a chat app
+   ========================================================================================= */
+@layer chat {
+  .scroll {
+    position: relative; overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-color: var(--edge) transparent; scrollbar-gutter: stable;
+    padding: var(--s7) var(--gutter) var(--s5);
+    padding-inline-end: 0;
+  }
+  /* Words that scroll up under the top bar fade out; a line is never cut in half. */
+  [data-pane="chat"]::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; block-size: var(--s4); z-index: 1; pointer-events: none;
+    background: linear-gradient(to bottom, var(--canvas), transparent);
+  }
+  .doc { display: flex; flex-direction: column; align-items: start; gap: var(--s5); padding-inline-end: var(--gutter); }
+  .doc > * { flex: none; max-inline-size: 100%; }
+
+  /* An idea opens like a chapter. */
+  .chapter { display: grid; gap: var(--s3); }
+  .chapter:not(:first-child) { margin-block-start: var(--s6); }
+  .chapter-count { font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: var(--w-ui); color: var(--ink-quiet); }
+  .chapter-title { font-size: var(--fs-display); line-height: var(--lh-display); letter-spacing: var(--ls-display); font-weight: 760; max-inline-size: 13em; }
+
+  /* The Chatbot's words: plain text on the canvas. */
+  .said { display: grid; gap: var(--s2); justify-items: start; }
+  .who { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-strong); color: var(--ink-quiet); }
+  .said p { max-inline-size: var(--measure); }
+  .said p b { font-weight: var(--w-focus); }
+
+  /* A word about an amount carries that amount's colour, and answers a touch. */
+  .term {
+    position: relative; display: inline; font: inherit; font-weight: inherit; color: var(--term);
+    padding: 0; border-radius: var(--r1); white-space: nowrap; cursor: pointer;
+    text-decoration: underline; text-decoration-color: color-mix(in oklab, var(--term) 45%, transparent);
+    text-decoration-thickness: 0.09em; text-underline-offset: 0.22em;
+    transition: text-decoration-color var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+  }
+  .term::after { content: ""; position: absolute; inset: -0.875rem -0.25rem; }   /* a finger-sized target */
+  .term[data-concept="equity"] { --term: var(--c-equity-text); --term-solid: var(--c-equity); }
+  .term[data-concept="cash"] { --term: var(--c-cash-text); --term-solid: var(--c-cash); }
+  .term[data-concept="machine"] { --term: var(--c-machine-text); --term-solid: var(--c-machine); }
+  .term[data-concept="owes"] { --term: var(--c-owes-text); --term-solid: var(--c-owes); }
+  .term[data-concept="cart"] { --term: var(--c-cart-text); --term-solid: var(--c-cart); }
+  .term:hover, .term.is-lit { text-decoration-color: var(--term); background: color-mix(in oklab, var(--term-solid) 34%, transparent); box-shadow: 0 0 0 0.1875rem color-mix(in oklab, var(--term-solid) 34%, transparent); }
+  .term:active { background: color-mix(in oklab, var(--term-solid) 55%, transparent); box-shadow: 0 0 0 0.1875rem color-mix(in oklab, var(--term-solid) 55%, transparent); }
+  .term:focus-visible { outline-offset: 3px; }
+
+  /* What hangs under an answer: its source, its Note. */
+  .said-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s4); margin-block-start: calc(var(--s1) * -1); }
+  .source { display: inline-flex; align-items: center; gap: var(--s2); min-block-size: var(--target); font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--ink-quiet); }
+  .source a { display: inline-flex; align-items: center; gap: var(--s1); min-block-size: var(--target); color: var(--accent-text); text-decoration: underline; text-decoration-thickness: 0.06em; text-underline-offset: 0.2em; text-decoration-color: color-mix(in oklab, var(--accent-text) 50%, transparent); transition: text-decoration-color var(--t-fast) var(--ease-out); }
+  .source a:hover { text-decoration-color: var(--accent-text); text-decoration-thickness: 0.1em; }
+  .source a:active { color: var(--ink); }
+
+  /* Save as Note: quiet until it is saved, then it wears the accent. */
+  .note {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    min-block-size: var(--target); padding-inline: var(--s3); margin-inline-start: calc(var(--s3) * -1);
+    border-radius: var(--r2);
+    font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui); color: var(--ink-quiet); white-space: nowrap;
+    transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), scale var(--t-press) var(--ease-out);
+  }
+  .note:hover { background: var(--wash); color: var(--ink); }
+  .note:active { background: var(--wash-strong); scale: 0.97; }
+  .note[aria-pressed="true"] { color: var(--accent-text); }
+  .note .icon .tick { stroke-dasharray: 8; stroke-dashoffset: 8; }
+  .note[aria-pressed="true"] .icon .tick { stroke-dashoffset: 0; }
+  .note[aria-pressed="true"] .icon .lines { opacity: 0; }
+
+  /* The marker: where the words hand over to the Widget. */
+  .marker {
+    display: inline-flex; align-items: center; gap: var(--s2);
+    min-block-size: var(--target); padding-inline: var(--s3); margin-inline-start: calc(var(--s3) * -1);
+    border-radius: var(--r2);
+    font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui); color: var(--accent-text);
+    transition: background-color var(--t-fast) var(--ease-out), scale var(--t-press) var(--ease-out);
+  }
+  .marker b { font-weight: var(--w-strong); color: var(--ink); }
+  .marker .icon.go { transition: translate var(--t-base) var(--spring-soft); }
+  .marker:hover { background: var(--accent-wash); }
+  .marker:hover .icon.go { translate: 0.1875rem 0; }
+  .marker:active { background: var(--accent-wash); scale: 0.98; }
+  .marker .here { fill: none; transition: fill var(--t-base) var(--ease-out); }
+  .marker[aria-current="true"] .here { fill: currentColor; }
+
+  /* The Student's words, set apart quietly. */
+  .asked { align-self: end; max-inline-size: min(100%, 27em); padding: var(--s3) var(--s4); background: var(--raised); border-radius: var(--r3); }
+  .aside { align-self: end; font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--ink-quiet); }
+  .aside.skip { align-self: stretch; display: flex; align-items: center; gap: var(--s4); }
+  .aside.skip::before, .aside.skip::after { content: ""; flex: 1; block-size: 1px; background: var(--line); }
+
+  /* Thinking: calm, alive, and honest about the half minute. */
+  .thinking { display: grid; grid-template-columns: auto 1fr; gap: var(--s1) var(--s3); align-items: start; }
+  .thinking .who { grid-column: 1 / -1; }
+  .thinking p { color: var(--ink-quiet); }
+  .thinking-mark { display: grid; gap: 0.1875rem; align-content: end; block-size: calc(var(--fs-body) * var(--lh-body)); padding-block-end: 0.3125rem; }
+  .thinking-mark i { inline-size: 0.875rem; block-size: 0.25rem; border-radius: 1px; background: var(--accent-text); }
+  .thinking-clock { font-variant-numeric: tabular-nums lining-nums; color: var(--ink); font-weight: var(--w-ui); margin-inline-end: var(--s2); }
+
+  .go-on { margin-block-start: var(--s1); }
+
+  /* The message box. Its left edge is the conversation's left edge. */
+  .composer { display: flex; align-items: center; gap: var(--s2); margin-inline: var(--gutter); padding-block: var(--s3) var(--s4); border-block-start: 1px solid transparent; transition: border-color var(--t-base) var(--ease-out); }
+  [data-pane="chat"][data-more] .composer { border-block-start-color: var(--line); }
+  .composer .send { padding-inline: var(--s4) var(--s3); }
+}
+
+/* =========================================================================================
+   The kit: every Widget is assembled from these blocks by one routine, from plain data
+   ========================================================================================= */
+@layer kit {
+  /* ---- Tabs ---------------------------------------------------------------------------- */
+  .tabbar { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); min-block-size: 3.25rem; min-inline-size: 0; }
+  .tabs { position: relative; display: flex; gap: var(--s5); min-inline-size: 0; overflow-x: auto; scrollbar-width: none; padding-inline: var(--s2); margin-inline: calc(var(--s2) * -1); }
+  .tabs[data-more] { mask-image: linear-gradient(to left, transparent, #000 2.5rem); }
+  .tab {
+    position: relative; flex: none; display: inline-flex; align-items: center; gap: var(--s2);
+    min-block-size: var(--target); padding-inline: 0;
+    font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui); color: var(--ink-quiet); white-space: nowrap;
+    transition: color var(--t-fast) var(--ease-out);
+  }
+  .tab::before { content: ""; position: absolute; inset: 0.375rem calc(var(--s2) * -1); border-radius: var(--r2); background: transparent; transition: background-color var(--t-fast) var(--ease-out); }
+  .tab > * { position: relative; }
+  .tab:hover { color: var(--ink); }
+  .tab:hover::before { background: var(--wash); }
+  .tab:active::before { background: var(--wash-strong); }
+  .tab[aria-selected="true"] { color: var(--ink); font-weight: var(--w-strong); anchor-name: --tab-now; }
+  .tab:focus-visible { outline-offset: -0.25rem; border-radius: var(--r2); }
+  .tab-tag { font-size: var(--fs-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-ui); color: var(--ink-quiet); padding: 0.0625rem var(--s2); border: 1px solid var(--line); border-radius: var(--pill); }
+  .tab[aria-selected="true"] .tab-tag { color: var(--accent-text); border-color: color-mix(in oklab, var(--accent) 60%, transparent); }
+  /* The underline slides from one tab to the next. */
+  .tabs::after {
+    content: ""; position: absolute; position-anchor: --tab-now;
+    inset-block-end: 0.375rem; inset-inline-start: anchor(self-start); inset-inline-end: anchor(self-end);
+    border-block-end: 2px solid var(--accent); border-radius: 1px;
+    @media (prefers-reduced-motion: no-preference) { transition: inset var(--t-base) var(--spring-soft); }
+  }
+  @supports not (position-anchor: --tab-now) {
+    .tabs::after { content: none; }
+    .tab[aria-selected="true"]::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0.375rem; border-block-end: 2px solid var(--accent); }
+  }
+  .jump { flex: none; font-size: var(--fs-ui); font-weight: var(--w-ui); color: var(--accent-text); min-block-size: var(--target); padding-inline: var(--s3); margin-inline-end: calc(var(--s3) * -1); border-radius: var(--r2); white-space: nowrap; }
+  .jump:hover { background: var(--accent-wash); }
+
+  /* ---- Frame and header ---------------------------------------------------------------- */
+  .panel { position: relative; display: grid; min-block-size: 0; }
+  .inst, .keep { grid-area: 1 / 1; min-block-size: 0; min-inline-size: 0; }
+  .inst { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; row-gap: var(--s4); }
+  .w-head { display: flex; align-items: start; justify-content: space-between; gap: var(--s4); padding-block-start: var(--s2); }
+  .w-title { font-size: var(--fs-title); line-height: var(--lh-title); letter-spacing: var(--ls-title); font-weight: var(--w-focus); max-inline-size: 15em; }
+  .w-head .note { flex: none; margin-inline: 0 calc(var(--s3) * -1); margin-block-start: -0.375rem; }
+  .w-foot { display: grid; row-gap: var(--s4); min-inline-size: 0; }
+
+  /* ---- The amounts block: two stacks on one scale, a total over each, equals between ---- */
+  .amounts { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; row-gap: var(--s4); min-block-size: 0; --gap: 3rem; }
+  .stage {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--gap) minmax(0, 1fr);
+    min-block-size: 4.5rem;
+    --head: calc(var(--fs-total) + var(--fs-micro) * 1.3 + 1.25rem);   /* room over a full stack for its total */
+  }
+  /* The floor: one dot a step, so a step of the control is a step up the dots. */
+  .stage::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle at center, var(--dot) 0.6px, transparent 1.1px);
+    background-size: var(--pitch, 1rem) var(--pitch, 1rem); background-position: left calc(var(--pitch, 1rem) / -2) bottom calc(var(--pitch, 1rem) / -2);
+  }
+  .stage::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; border-block-end: 1px solid var(--edge); pointer-events: none; }
+  .col { position: relative; display: grid; padding-block-start: var(--head); min-block-size: 0; }
+  .well { position: relative; min-block-size: 0; margin-inline-end: var(--depth); }
+  /* the contact shadow: the stack stands on the floor */
+  .well::after {
+    content: ""; position: absolute; inset-inline: 0.25rem calc(var(--depth) * -1.25); inset-block-start: 100%; block-size: 0.875rem;
+    background: radial-gradient(ellipse 60% 100% at 50% 0, rgb(0 0 0 / 0.5), transparent 75%);
+    opacity: var(--has, 1); pointer-events: none;
+  }
+
+  .block {
+    position: absolute; inset-inline: 0; inset-block-end: calc(var(--o, 0) * 100%); block-size: calc(var(--s, 0) * 100%);
+    --c: var(--c-cart); --c-top: var(--c-cart-top); --c-side: var(--c-cart-side);
+    transform-origin: 50% 100%;
+    transition: filter var(--t-base) var(--ease-out), translate var(--t-base) var(--spring-soft);
+    -webkit-user-select: none; user-select: none;
+  }
+  .block[data-block="equity"] { --c: var(--c-equity); --c-top: var(--c-equity-top); --c-side: var(--c-equity-side); }
+  .block[data-block="cash"] { --c: var(--c-cash); --c-top: var(--c-cash-top); --c-side: var(--c-cash-side); }
+  .block[data-block="machine"] { --c: var(--c-machine); --c-top: var(--c-machine-top); --c-side: var(--c-machine-side); }
+  .block[data-block="owes"] { --c: var(--c-owes); --c-top: var(--c-owes-top); --c-side: var(--c-owes-side); }
+  .block[data-empty] { visibility: hidden; }
+  /* the lit top and the shaded side: one lamp, up and to the left */
+  .block::before { content: ""; position: absolute; inset-inline-start: 0; inset-block-end: 100%; inline-size: 100%; block-size: var(--rise); transform-origin: 0 100%; transform: skewX(-60deg); background: var(--c-top); }
+  .block::after { content: ""; position: absolute; inset-inline-start: 100%; inset-block-end: 0; inline-size: var(--depth); block-size: 100%; transform-origin: 0 100%; transform: skewY(-30deg); background: var(--c-side); }
+  .face {
+    position: absolute; inset: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding-inline: var(--s4) var(--s3);
+    background: var(--c); color: var(--on-data);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 -1px 0 rgb(0 0 0 / 0.3);
+    font-size: var(--fs-micro); line-height: 1; letter-spacing: var(--ls-micro); font-weight: var(--w-strong);
+  }
+  /* a block carries its name when it has room; the script measures and says so */
+  .face-name, .face .icon { visibility: hidden; white-space: nowrap; flex: none; }
+  /* inherit, not visible: while the chart is hidden as it is being built, its names stay hidden with it */
+  .block:is([data-label="full"], [data-label="name"]) .face-name { visibility: inherit; }
+  .block:is([data-label="full"], [data-label="grip"]) .face .icon { visibility: inherit; }
+  .block[data-label="grip"] .face { justify-content: end; }
+  .block[data-label="grip"] .face-name { display: none; }
+  .face .icon { opacity: 0.85; margin-inline-start: auto; }
+  .block[data-movable] { cursor: grab; touch-action: none; }
+  .block[data-movable]:hover:not(.is-held) { translate: 0 -0.125rem; filter: brightness(1.08); }
+  .block.is-held { cursor: grabbing; filter: brightness(1.12); }
+  .block.is-held .face { box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.55); }
+  .amounts.is-dragging { cursor: grabbing; }
+  /* A word turns the lamp on its block and the rest falls into shade. A touch on a block only shows what moves with it. */
+  .amounts[data-lit="spot"] .block:not(.is-lit) { filter: brightness(0.46) saturate(0.7); }
+  .amounts[data-lit="link"] .block:not(.is-lit) { filter: brightness(0.8); }
+  .amounts[data-lit] .block.is-lit .face { box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.6); }
+  /* a pressed stack gives a hair, and springs back */
+  .well { transform-origin: 50% 100%; transition: scale var(--t-base) var(--spring); }
+  .well.is-pressed { scale: 1 0.985; transition-duration: var(--t-press); }
+
+  .head {
+    position: absolute; inset-inline: 0 var(--depth); inset-block-end: calc(var(--top, 0) * (100% - var(--head)) + var(--rise) + 0.5rem);
+    display: grid; justify-items: center; gap: 0.125rem; pointer-events: none;
+  }
+  .head-name { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-ui); color: var(--ink-quiet); white-space: nowrap; }
+  .head-eq { display: none; }
+  .total { font-size: var(--fs-total); line-height: var(--lh-total); letter-spacing: var(--ls-total); font-weight: 760; font-variant-numeric: tabular-nums lining-nums; }
+  .eq-col { position: relative; }
+  .equals {
+    position: absolute; inset-inline: 0; inset-block-end: calc(var(--top, 0) * (100% - var(--head)) + var(--rise) + 0.5rem);
+    display: grid; place-items: center; block-size: var(--fs-total); pointer-events: none;
+    font-size: calc(var(--fs-total) * 0.8); line-height: 1; font-weight: 640; color: var(--ink-quiet);
+    transition: color var(--t-base) var(--ease-out);
+  }
+
+  /* The same blocks lying down: two bars on one scale, their ends level. For when the question, or the keyboard, needs the room. */
+  .amounts[data-lay="flat"] { grid-template-rows: minmax(0, 1fr); align-items: center; }
+  .amounts[data-lay="flat"] .stage { grid-template-columns: minmax(0, 1fr); row-gap: var(--s3); min-block-size: 0; }
+  .amounts[data-lay="flat"] .stage::before, .amounts[data-lay="flat"] .stage::after { content: none; }
+  .amounts[data-lay="flat"] :is(.eq-col, .ledger) { display: none; }
+  .amounts[data-lay="flat"] .col { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(1.75rem, 2.5rem); column-gap: var(--s4); row-gap: 0.125rem; padding: 0; }
+  .amounts[data-lay="flat"] .head { position: static; grid-area: 1 / 1; display: flex; align-items: baseline; justify-content: start; gap: var(--s2); min-block-size: 1.5rem; }
+  .amounts[data-lay="flat"] .head-eq { display: inline; font-size: var(--fs-lead); line-height: 1; font-weight: var(--w-strong); color: var(--ink-quiet); }
+  .amounts[data-lay="flat"] .total { font-size: var(--fs-lead); letter-spacing: var(--ls-lead); }
+  .amounts[data-lay="flat"] .ledger-col { grid-area: 1 / 2; align-self: center; }
+  .amounts[data-lay="flat"] .well { grid-area: 2 / 1 / auto / -1; margin-block-start: var(--rise); box-shadow: 0 1px 0 var(--edge); }
+  .amounts[data-lay="flat"] .well::after { inset-inline: 0.25rem calc((1 - var(--top, 0)) * 100% - var(--depth) * 1.25); block-size: 0.625rem; }
+  .amounts[data-lay="flat"] .block { inset-block: 0; inset-inline: calc(var(--o, 0) * 100%) auto; inline-size: calc(var(--s, 0) * 100%); block-size: auto; touch-action: pan-y; }
+  .amounts[data-lay="flat"] .face { padding-inline: var(--s3) var(--s2); }
+  .amounts[data-lay="flat"] .face .icon { rotate: 90deg; }
+
+  /* The readout that travels with a grabbed block: the amount, and how much it changed. */
+  .chip {
+    position: absolute; inset: 0 auto auto 0; z-index: 3; pointer-events: none;
+    display: flex; align-items: baseline; gap: var(--s2); padding: var(--s2) var(--s3);
+    background: var(--canvas); border: 1px solid var(--edge); border-radius: var(--r2); box-shadow: var(--shadow-chip);
+    font-size: var(--fs-ui); line-height: 1; white-space: nowrap; font-variant-numeric: tabular-nums lining-nums;
+    opacity: 0; scale: 0.9; transform-origin: 50% 100%;
+    transition: opacity var(--t-fast) var(--ease-out), scale var(--t-base) var(--spring);
+  }
+  .chip.is-on { opacity: 1; scale: 1; }
+  .chip b { font-weight: var(--w-focus); font-size: var(--fs-body); }
+  .chip span { color: var(--ink-quiet); }
+
+  /* ---- The ledger: every label and amount again, in words and figures ------------------- */
+  .ledger { display: grid; grid-template-columns: minmax(0, 1fr) var(--gap) minmax(0, 1fr); font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); }
+  .ledger-col:last-child { grid-column: 3; }
+  .row {
+    position: relative; display: grid; grid-template-columns: var(--s2) minmax(0, 1fr) auto; column-gap: var(--s2); align-items: center;
+    min-block-size: 1.625rem; cursor: default; border-radius: var(--r1);
+    transition: color var(--t-fast) var(--ease-out), opacity var(--t-fast) var(--ease-out);
+  }
+  .row::before { content: ""; position: absolute; inset: 0 calc(var(--s2) * -1); border-radius: var(--r1); background: transparent; transition: background-color var(--t-fast) var(--ease-out); }
+  .row > * { position: relative; }
+  .swatch { inline-size: var(--s2); block-size: var(--s2); border-radius: 2px; background: var(--c, var(--c-cart)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25); }
+  .row-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-amount { font-weight: var(--w-strong); font-variant-numeric: tabular-nums lining-nums; }
+  .row[data-zero] { color: var(--ink-quiet); }
+  .row[data-zero] .row-amount { font-weight: var(--w-ui); }
+  .row.is-lit::before, .row:hover::before { background: var(--wash); }
+  .amounts[data-lit="spot"] .row:not(.is-lit) { opacity: 0.5; }
+  .amounts[data-lay="flat"] .ledger-col { display: flex; flex-wrap: wrap; justify-content: end; align-items: center; gap: 0 var(--s3); font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); }
+  .amounts[data-lay="flat"] .row { display: inline-flex; gap: 0.375rem; min-block-size: 1.5rem; }
+  .amounts[data-lay="flat"] .row-name { color: var(--ink-quiet); }
+  [data-c="equity"] { --c: var(--c-equity); --c2: var(--c-equity); }
+  [data-c="cash"] { --c: var(--c-cash); }
+  [data-c="machine"] { --c: var(--c-machine); }
+  [data-c="owes"] { --c: var(--c-owes); }
+  [data-c="cart"] { --c: var(--c-cart); }
+
+  /* ---- What the Chatbot did with its own hand ------------------------------------------- */
+  .hand { display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui); color: var(--accent-text); }
+
+  /* ---- Controls: a labelled native range for every amount that can move ----------------- */
+  .controls { display: grid; grid-template-columns: minmax(0, 1fr) var(--gap, 3rem) minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .controls[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
+  .control { position: relative; display: grid; grid-template-rows: subgrid; grid-row: span 3; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s3); align-items: end; }
+  .control:nth-child(2) { grid-column: 3; }
+  .control-label { display: grid; grid-template-columns: var(--s2) minmax(0, 1fr); column-gap: var(--s2); align-items: baseline; font-size: var(--fs-ui); line-height: var(--lh-ui); letter-spacing: var(--ls-ui); font-weight: var(--w-ui); }
+  .control-label .swatch { align-self: start; margin-block-start: 0.34rem; background: linear-gradient(to right, var(--ca) 50%, var(--cb, var(--ca)) 50%); }
+  .control-value { display: grid; justify-items: end; align-self: end; font-variant-numeric: tabular-nums lining-nums; }
+  .control-value output { font-size: var(--fs-lead); line-height: 1.1; letter-spacing: var(--ls-lead); font-weight: var(--w-focus); }
+  .control-delta { font-size: var(--fs-micro); line-height: 1; color: var(--ink-quiet); block-size: 0; overflow: visible; translate: 0 -2.1em; opacity: 0; transition: opacity var(--t-fast) var(--ease-out); white-space: nowrap; }
+  .control.is-moving .control-delta { opacity: 1; }
+  .control .range { grid-row: 2; grid-column: 1 / -1; }
+
+  .range {
+    --slider-track-size: 0.25rem;
+    --slider-thumb-size: 1.375rem;
+    --slider-track-color: var(--edge);
+    --slider-fill-color: var(--accent);
+    --slider-thumb-color: var(--accent);
+    --p: 0;                                                                      /* 0 to 1, kept in step by the script */
+    --stop: calc(var(--slider-thumb-size) / 2 + (100% - var(--slider-thumb-size)) * var(--p));
+    appearance: none; -webkit-appearance: none;
+    display: block; inline-size: 100%; block-size: var(--target); margin: 0; padding: 0; border: 0; border-radius: var(--pill);
+    background: transparent; cursor: pointer; touch-action: pan-y;
+  }
+  .range::-webkit-slider-runnable-track {
+    block-size: var(--slider-track-size); border: 0; border-radius: var(--pill);
+    background: linear-gradient(to right, var(--slider-fill-color) var(--stop), var(--slider-track-color) var(--stop));
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    inline-size: var(--slider-thumb-size); block-size: var(--slider-thumb-size);
+    margin-block-start: calc((var(--slider-track-size) - var(--slider-thumb-size)) / 2);
+    border: 2px solid var(--ink); border-radius: 50%; background: var(--slider-thumb-color);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+    transition: scale var(--t-fast) var(--spring-soft), box-shadow var(--t-fast) var(--ease-out), background-color var(--t-fast) var(--ease-out);
+  }
+  .range::-moz-range-track { block-size: var(--slider-track-size); border: 0; border-radius: var(--pill); background: var(--slider-track-color); }
+  .range::-moz-range-progress { block-size: var(--slider-track-size); border-radius: var(--pill); background: var(--slider-fill-color); }
+  .range::-moz-range-thumb {
+    box-sizing: border-box; inline-size: var(--slider-thumb-size); block-size: var(--slider-thumb-size);
+    border: 2px solid var(--ink); border-radius: 50%; background: var(--slider-thumb-color);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  }
+  .range:hover::-webkit-slider-thumb { scale: 1.1; background: var(--accent-hi); }
+  .range:hover::-moz-range-thumb { background: var(--accent-hi); }
+  .range:active::-webkit-slider-thumb { scale: 0.96; background: var(--accent-lo); box-shadow: 0 0 0 0.5rem var(--accent-wash); }
+  .range:active::-moz-range-thumb { background: var(--accent-lo); box-shadow: 0 0 0 0.5rem var(--accent-wash); }
+  .range:focus-visible { outline: 2px solid transparent; }
+  .range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--raised), 0 0 0 5px var(--accent); }
+  .range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px var(--raised), 0 0 0 5px var(--accent); }
+
+  /* The pointer mark: the Chatbot has its finger on this control. */
+  .pointing { grid-row: 3; grid-column: 1 / -1; display: flex; align-items: center; gap: var(--s2); margin-block-start: -0.375rem; font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-strong); color: var(--accent-text); }
+  .control[data-pointed] .range { --slider-thumb-color: var(--accent-hi); }
+  .control[data-pointed]::before { content: ""; position: absolute; inset: calc(var(--s2) * -1) calc(var(--s3) * -1); border: 1px solid var(--accent); border-radius: var(--r3); background: var(--accent-wash); pointer-events: none; }
+  .control > * { position: relative; }
+
+  /* ---- Test intuition: one question, four answers --------------------------------------- */
+  .ti { display: grid; gap: var(--s3); padding-block-start: var(--s4); border-block-start: 1px solid var(--line); }
+  .ti-kicker { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-strong); color: var(--ink-quiet); }
+  .ti-q { font-size: var(--fs-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); font-weight: 700; max-inline-size: 30em; margin-block-start: calc(var(--s2) * -1); }
+  .answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+  .answer {
+    position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--s3); align-items: center;
+    min-block-size: 3.5rem; padding: var(--s2) var(--s3);
+    border: 1px solid var(--edge); border-radius: var(--r3); background: transparent;
+    font-size: var(--fs-ui); line-height: 1.3; letter-spacing: var(--ls-ui); font-weight: var(--w-ui); color: var(--ink);
+    transition: background-color var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), scale var(--t-press) var(--ease-out);
+  }
+  .answer-key { display: grid; place-items: center; inline-size: 1.5rem; block-size: 1.5rem; border-radius: var(--r1); background: var(--wash-strong); font-size: var(--fs-micro); font-weight: var(--w-strong); color: var(--ink-quiet); transition: background-color var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out); }
+  .answer-key .icon { inline-size: 0.875rem; block-size: 0.875rem; }
+  .answer-text { display: grid; gap: 0.125rem; }
+  .verdict { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-strong); }
+  .answer:hover:not(:disabled) { border-color: var(--accent-text); background: var(--accent-wash); }
+  .answer:hover:not(:disabled) .answer-key { background: var(--accent); color: var(--on-accent); }
+  .answer:active:not(:disabled) { scale: 0.985; background: color-mix(in oklab, var(--accent) 30%, transparent); }
+  .answer:disabled { border-color: var(--line); color: var(--ink-quiet); }
+  .answer[data-verdict="wrong"] { border-color: var(--line); border-style: dashed; color: var(--ink-quiet); }
+  .answer[data-verdict="wrong"] .verdict { color: var(--ink); }
+  .answer[data-verdict="right"] { border-color: var(--right-edge); background: var(--right-wash); color: var(--ink); }
+  .answer[data-verdict="right"] .answer-key { background: var(--right); color: #0b2a14; }
+  .answer[data-verdict="right"] .verdict { color: var(--right); }
+
+  /* ---- What to keep: the page a Student saves ------------------------------------------- */
+  .keep { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; row-gap: var(--s5); }
+  .keep-list { display: grid; align-content: start; counter-reset: keep; }
+  .keep-list li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); column-gap: var(--s3); align-items: baseline; padding-block: var(--s3); border-block-start: 1px solid var(--line); line-height: 1.45; max-inline-size: 36em; }
+  .keep-list li::before { counter-increment: keep; content: counter(keep); font-size: var(--fs-ui); font-weight: var(--w-focus); color: var(--ink-quiet); font-variant-numeric: tabular-nums lining-nums; }
+  .keep-foot { display: grid; gap: var(--s4); }
+  .own { display: grid; gap: var(--s2); }
+  .own-label { font-size: var(--fs-ui); line-height: var(--lh-ui); font-weight: var(--w-ui); }
+  .own-label span { color: var(--ink-quiet); font-weight: var(--w-text); }
+  .own-row { display: flex; gap: var(--s2); }
+  .own-kept { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s3); padding-inline-start: var(--s4); border-inline-start: 2px solid var(--accent); }
+  .own-kept p { font-size: var(--fs-ui); line-height: var(--lh-ui); }
+  .own-kept p small { display: block; font-size: var(--fs-micro); color: var(--ink-quiet); }
+  .finish { justify-self: end; max-inline-size: 100%; min-block-size: 3rem; padding-inline: var(--s5) var(--s4); white-space: normal; text-align: start; }
+
+  /* ---- A Widget being built: the plan shows first, then the blocks land in it ----------- */
+  .plan { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity var(--t-base) var(--ease-out); }
+  .plan i { position: absolute; inset-inline: 0; inset-block-end: calc(var(--o) * 100%); block-size: calc(var(--s) * 100%); border: 1px dashed var(--edge); border-radius: 1px; }
+  .inst[data-building~="amounts"] .plan { opacity: 1; visibility: visible; }
+  .w-title.is-building { color: var(--ink-quiet); }
+}
+
+/* =========================================================================================
+   The Notes sheet: it lies over the page
+   ========================================================================================= */
+@layer sheet {
+  .sheet {
+    inset: 0 0 0 auto; margin: 0; padding: 0; border: 0;
+    inline-size: min(26.25rem, 92vw); block-size: 100%; max-block-size: none; max-inline-size: none;
+    background: var(--raised); color: var(--ink);
+    border-inline-start: 1px solid var(--line);
+    box-shadow: var(--shadow-sheet);
+    overflow: hidden;
+  }
+  .sheet[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  .sheet::backdrop { background: rgb(3 5 12 / 0.62); }
+  .sheet-head { display: flex; align-items: start; justify-content: space-between; gap: var(--s4); padding: var(--s5) var(--s5) var(--s4) var(--s6); }
+  .sheet-head h2 { font-size: var(--fs-title); line-height: var(--lh-title); letter-spacing: var(--ls-title); font-weight: var(--w-focus); }
+  .sheet-sub { font-size: var(--fs-ui); line-height: var(--lh-ui); color: var(--ink-quiet); margin-block-start: var(--s1); }
+  .sheet-close { margin-block-start: -0.375rem; }
+  .sheet-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-color: var(--edge) transparent; padding: 0 var(--s6) var(--s6); display: grid; align-content: start; gap: var(--s5); }
+  .sheet-group { display: grid; gap: var(--s1); }
+  .sheet-group > h3 { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); font-weight: var(--w-strong); color: var(--ink-quiet); padding-block-end: var(--s2); }
+  .saved-note { display: grid; gap: 0.125rem; padding-block: var(--s3); border-block-start: 1px solid var(--line); }
+  .saved-kind { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--ls-micro); color: var(--ink-quiet); }
+  .saved-title { font-size: var(--fs-ui); line-height: 1.4; font-weight: var(--w-strong); }
+  .saved-text { font-size: var(--fs-ui); line-height: 1.45; color: var(--ink-quiet); }
+  .saved-own { margin-block-start: var(--s2); padding-inline-start: var(--s3); border-inline-start: 2px solid var(--accent); font-size: var(--fs-ui); line-height: 1.45; }
+  .saved-own small { display: block; font-size: var(--fs-micro); color: var(--ink-quiet); }
+}
+
+/* =========================================================================================
+   Motion. Everything here is opt-in: with reduced motion the settled state shows at once.
+   ========================================================================================= */
+@layer motion {
+  /* The sheet slides in from its edge and the page dims; out again the same way. */
+  .sheet { opacity: 0; transition-property: opacity, translate, display, overlay; transition-duration: var(--t-base); transition-timing-function: var(--ease-out); transition-behavior: allow-discrete; }
+  .sheet::backdrop { opacity: 0; transition-property: opacity, display, overlay; transition-duration: var(--t-base); transition-timing-function: var(--ease-out); transition-behavior: allow-discrete; }
+  .sheet[open]:where(:not([data-closing])) {
+    opacity: 1;
+    @starting-style { opacity: 0; }
+    &::backdrop { opacity: 1; @starting-style { opacity: 0; } }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet { translate: 2.5rem 0; transition-duration: var(--t-move); transition-timing-function: var(--spring-soft); }
+    .sheet[open]:where(:not([data-closing])) { translate: 0 0; @starting-style { translate: 2.5rem 0; } }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet, .sheet::backdrop { transition-duration: 100ms; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* New things in the conversation arrive one after another. */
+    .is-fresh { animation: arrive var(--t-move) var(--spring-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+    @keyframes arrive { from { opacity: 0; translate: 0 0.625rem; } }
+
+    /* Blocks land on the floor, bottom first; then the totals, then the equals sign. */
+    .is-landing .block { animation: land 360ms var(--spring) both; animation-delay: calc(var(--i, 0) * 70ms + var(--wait, 0ms)); }
+    .is-landing .head { animation: arrive var(--t-base) var(--ease-out) both; animation-delay: calc(var(--n, 3) * 70ms + 90ms + var(--wait, 0ms)); }
+    .is-landing .equals { animation: pop 300ms var(--spring) both; animation-delay: calc(var(--n, 3) * 70ms + 190ms + var(--wait, 0ms)); }
+    .is-landing .well::after { animation: fade var(--t-base) var(--ease-out) both; animation-delay: var(--wait, 0ms); }
+    .is-landing .row { animation: arrive var(--t-base) var(--ease-out) both; animation-delay: calc(var(--n, 3) * 70ms + var(--sibling-index, 1) * 35ms + var(--wait, 0ms)); }
+    @supports (animation-delay: calc(sibling-index() * 0.1s)) {
+      .is-landing .row { animation-delay: calc(var(--n, 3) * 70ms + sibling-index() * 35ms + var(--wait, 0ms)); }
+    }
+    @keyframes land { from { opacity: 0; translate: 0 -1.125rem; } 35% { opacity: 1; } }
+    @keyframes pop { from { opacity: 0; scale: 0.4; } }
+    @keyframes fade { from { opacity: 0; } }
+
+    /* Controls and the question rise in behind them. */
+    .is-rising { animation: arrive var(--t-move) var(--spring-soft) both; animation-delay: var(--wait, 0ms); }
+    .is-swapping { animation: swap var(--t-base) var(--ease-out) both; }
+    @keyframes swap { from { opacity: 0; translate: 0 0.375rem; } }
+
+    /* A new tab slides in beside the old one. */
+    .tab.is-new { animation: tab-in var(--t-move) var(--spring-soft) both; }
+    @keyframes tab-in { from { opacity: 0; translate: -0.75rem 0; } }
+
+    /* The Chatbot points: one ring, once. */
+    .control[data-pointed]::before { animation: point 900ms var(--ease-out) 240ms 1 both; }
+    @keyframes point { 0% { opacity: 0; scale: 1.06 1.3; } 40% { opacity: 1; scale: 1; } 70% { box-shadow: 0 0 0 0.375rem var(--accent-wash); } 100% { box-shadow: 0 0 0 0 transparent; } }
+    .pointing { animation: arrive var(--t-move) var(--spring-soft) 300ms both; }
+    .hand.is-new { animation: arrive var(--t-move) var(--spring-soft) both; }
+
+    /* Right: both stacks give one small hop together, and the equals sign answers. */
+    .is-cheering .well { animation: hop 420ms var(--spring) 1; transform-origin: 50% 100%; }
+    .is-cheering .equals { animation: agree 900ms var(--ease-out) 1; }
+    @keyframes hop { 0% { translate: 0 0; scale: 1; } 30% { translate: 0 -0.5rem; scale: 1 1.015; } 100% { translate: 0 0; scale: 1; } }
+    @keyframes agree { 15%, 60% { color: var(--right); scale: 1.25; } }
+    .answer[data-verdict="right"].is-new .answer-key { animation: pop 320ms var(--spring) both; }
+    .answer[data-verdict].is-new .verdict { animation: arrive var(--t-base) var(--ease-out) both; }
+
+    /* Notes count: the number answers a save. */
+    .notes-count.is-bumped { animation: bump 360ms var(--spring) 1; }
+    @keyframes bump { 30% { translate: 0 -0.25rem; color: var(--accent-text); } }
+    .note .icon .tick { transition: stroke-dashoffset var(--t-base) var(--ease-out); }
+
+    /* Thinking: three blocks stack, rest, and clear. The only loop on the screen. */
+    .thinking-mark i { animation: stack-up 2.6s var(--ease-out) infinite both; }
+    .thinking-mark i:nth-child(3) { animation-delay: 0s; }
+    .thinking-mark i:nth-child(2) { animation-delay: 0.22s; }
+    .thinking-mark i:nth-child(1) { animation-delay: 0.44s; }
+    @keyframes stack-up { 0% { opacity: 0; translate: 0 -0.375rem; } 14%, 68% { opacity: 1; translate: 0 0; } 84%, 100% { opacity: 0; translate: 0 0; } }
+  }
+}
+
+/* =========================================================================================
+   Sizes. Type follows width (above). Height is paid for by the stacks, then by scrolling.
+   ========================================================================================= */
+@layer sizes {
+  /* Test intuition: the question is the loudest thing now; the chart lies down. */
+  .inst[data-ti] { row-gap: var(--s3); }
+  .inst[data-ti] .w-head { padding-block-start: 0; }
+  .inst[data-ti] .w-title { font-size: var(--fs-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); font-weight: var(--w-strong); max-inline-size: none; }
+  .inst[data-ti] .w-foot { row-gap: var(--s3); }
+
+  @media (max-height: 43.75rem) {   /* a short laptop: tighten the frame, keep the type */
+    .bar { min-block-size: 3.25rem; }
+    .scroll { padding-block-start: var(--s6); }
+    [data-pane="widget"] { padding-block-end: var(--s4); }
+    .tabbar { min-block-size: 2.75rem; }
+    .inst { row-gap: var(--s3); }
+    .w-foot, .amounts { row-gap: var(--s3); }
+    .inst[data-ti] .ti { padding-block-start: var(--s3); gap: var(--s2); }
+    .inst[data-ti] .answer { min-block-size: 3rem; }
+    .keep { row-gap: var(--s4); }
+    .keep-list li { padding-block: var(--s2); }
+  }
+
+  @media (max-height: 30.625rem) {  /* above the on-screen keyboard: fix the board, scroll the panel */
+    .bar { min-block-size: var(--target); }
+    .lesson-title, .steps { display: none; }
+    .lesson-topic { font-size: var(--fs-ui); color: var(--ink); }
+    .scroll { padding-block: var(--s4) var(--s3); }
+    .doc { gap: var(--s4); }
+    .chapter-title { font-size: var(--fs-title); line-height: var(--lh-title); letter-spacing: var(--ls-title); }
+    .composer { padding-block: var(--s2); }
+    [data-pane="widget"] { padding-block-end: 0; }
+    .tabbar { min-block-size: var(--target); }
+    .panel { display: block; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-color: var(--edge) transparent; margin-inline: calc(var(--s3) * -1); padding-inline: var(--s3); padding-block-end: var(--s3); }
+    .inst, .inst[data-ti] { grid-template-rows: auto auto auto; row-gap: var(--s1); }
+    .tab:not([aria-selected="true"]) .tab-tag { display: none; }       /* room for the jump link */
+    .w-head, .inst[data-ti] .w-head { padding-block-start: 0; align-items: center; min-block-size: var(--target); }
+    .w-title, .inst[data-ti] .w-title { font-size: var(--fs-lead); line-height: var(--lh-lead); letter-spacing: var(--ls-lead); max-inline-size: none; }
+    .w-head .note { margin-block-start: 0; }
+    .control .range { margin-block-start: -0.375rem; }
+    .amounts[data-lay="flat"] .stage { row-gap: var(--s1); }
+    .amounts[data-lay="flat"] .col { grid-template-rows: auto 1.75rem; row-gap: 0; }
+    .w-foot, .inst[data-ti] .w-foot { row-gap: var(--s2); }
+    .keep { grid-template-rows: auto auto auto; row-gap: var(--s3); }
+    .keep-list li { padding-block: var(--s2); }
+  }
+
+  /* Someone who asks for more contrast gets firmer lines. */
+  @media (prefers-contrast: more) {
+    :root { --line: #5f697e; --edge: #9da7bd; --ink-quiet: #c3cada; }
+  }
+  /* Forced colours: the system paints; keep the edges that carry state. */
+  @media (forced-colors: active) {
+    .block .face { border: 1px solid CanvasText; forced-color-adjust: none; }
+    .steps li { border: 1px solid CanvasText; }
+    .answer[data-verdict] { border-width: 2px; }
+    /* gradients are removed here, so the slider's groove gets an edge of its own */
+    .range::-webkit-slider-runnable-track { border: 1px solid ButtonText; }
+    .range::-moz-range-track { border: 1px solid ButtonText; }
+  }
+}

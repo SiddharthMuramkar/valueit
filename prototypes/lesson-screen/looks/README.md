@@ -1,25 +1,32 @@
-# The three Lesson looks — screens, sizes and tokens
+# The Lesson looks: screens, sizes and tokens
 
-Start the comparison at **1180 × 750**, the landscape iPad size. In all three looks, the Chatbot takes the left 48% and the Widget the right 52%. Use the short laptop to see what happens when the question and the chart compete for height.
+**Royal blocks is the chosen look.** The other three are the looks it was chosen over. In all four, the Chatbot takes the left 48% and the Widget the right 52%. Start at **1180 × 750**, the landscape iPad size, and use the short laptop to see what happens when the question and the chart compete for height.
 
 ## What the screen sizes taught
 
-The table uses Playful blocks. “Longest line” counts characters on the longest line of the Chatbot’s opening paragraph. All dimensions are CSS pixels.
+The table uses Royal blocks. "Longest line" counts characters on the longest line of the Chatbot's opening paragraph. All dimensions are CSS pixels.
 
 | Screen | Chatbot | Longest line | Smallest text | Amounts block, opening → Test intuition | What changes |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Full laptop, 1470 × 840 | 17.9 px | 72 characters | 12.25 px | 475 → 292 px | Everything at full size. Tall stacks, room to spare. |
-| Short laptop, 1366 × 650 | 17.5 px | 68 characters | 12.25 px | 339 → 171 px | Top bar and Widget tighten. Stacks shorten; type barely moves. |
-| Landscape iPad, 1180 × 750 | 16.8 px | 63 characters | 12.25 px | 392 → 187 px | The size to design for first. Nothing is cramped yet. |
-| Small iPad, 1080 × 740 | 16.5 px | 57 characters | 12.25 px | 385 → 178 px | Slightly smaller type, shorter lines. Stacks still tell the story. |
-| iPad, keyboard up, 1180 × 353 | 16.8 px | 63 characters | 12.25 px | 100 → 100 px | Conversation unchanged. Widget panel scrolls; board is a 74 px strip; a "Test intuition ↓" shortcut appears. |
-| Small iPad, keyboard up, 1080 × 348 | 16.5 px | 57 characters | 12.25 px | 119 → 119 px | Same, but the ledger wraps to an extra line, which is why this one is taller. |
+| Full laptop, 1470 × 840 | 18 px | 67 characters | 12.5 px | 531 → 311 px | Everything at full size. Tall stacks, room to spare. |
+| Short laptop, 1366 × 650 | 17.6 px | 67 characters | 12.5 px | 378 → 163 px | Top bar and Widget frame tighten. Stacks shorten; type barely moves. |
+| Landscape iPad, 1180 × 750 | 16.9 px | 63 characters | 12.5 px | 436 → 194 px | The size to design for first. Nothing is cramped yet. |
+| Small iPad, 1080 × 740 | 16.5 px | 56 characters | 12.5 px | 429 → 185 px | Slightly smaller type, shorter lines. Stacks still tell the story. |
+| iPad, keyboard up, 1180 × 353 | 16.9 px | 63 characters | 12.5 px | 108 → 108 px | Conversation unchanged. The stacks lie down as two bars; the Widget panel scrolls; a "Test intuition ↓" shortcut appears. |
+| Small iPad, keyboard up, 1080 × 348 | 16.5 px | 56 characters | 12.5 px | 108 → 108 px | The same. |
 
-Amounts block means the whole instrument: totals, stacks and ledger together. At Test intuition the question takes space, so the block shrinks everywhere except with the keyboard up, where it is already at its floor. Opening paragraphs were measured line by line; Night glow runs 72 down to 60 characters with 12 px smallest text, Bold paper 72 down to 57 with 11.5 px, dropping to 10 px with the keyboard up.
+Amounts block means the whole instrument: totals, blocks and ledger together. At Test intuition the question takes space, so in Royal blocks the stacks lie down as two bars on the same scale, each with its own ledger beside it. With the keyboard up they already lie down, so nothing changes. Measured with `node tools/sizes.mjs royal`. The earlier looks, measured the same way: Playful blocks runs 72 down to 57 characters with 12.25 px smallest text, Night glow 72 down to 60 with 12 px, Bold paper 72 down to 57 with 11.5 px, dropping to 10 px with the keyboard up.
 
-**Scaling rule.** Scale type with screen width, never with height. Hold the Chatbot between 16.5 px and about 18 px, cap the line near 60 characters so lines stay between 57 and 72, and keep the smallest text fixed instead of shrinking it. Let the Widget's stacks absorb lost height; below about 490 px of height, stop shrinking and switch: fix the board height, scroll the panel, and give Test intuition a jump link. Build at 1180 × 750 first, then check 1366 × 650 and the two keyboard-up sizes. The table records measurements from Chrome. The same six viewport sizes were checked in Firefox. A physical iPad Safari check is still open.
+**Scaling rule.** Scale type with screen width, never with height. Hold the Chatbot between 16.5 px and 18 px, cap its column near 31 em so the usual line is about 60 characters, and keep the smallest text fixed instead of shrinking it. Let the Widget's stacks absorb lost height. When the question arrives, or below about 490 px of height, stop shrinking and switch: lay the stacks down, scroll the panel, and give Test intuition a jump link. Build at 1180 × 750 first, then check 1366 × 650 and the two keyboard-up sizes. The table records measurements from Chrome. The same six viewport sizes were checked in Firefox. A physical iPad Safari check is still open.
 
-## The three looks
+## The looks
+
+### Royal blocks, the chosen look — [notes](royal/NOTES.md) · [royal.css](royal/royal.css)
+
+- **Type.** Inter for everything, one variable file with weight and optical-size axes, self-hosted under the SIL Open Font License 1.1. Chatbot measures 18 px on the big laptop down to 16.5 px on the small iPad, unchanged with the keyboard up. The idea title reaches 50 px and the totals 42 px. Heavy weights are kept for what the Student should look at next.
+- **Palette.** Blue-black canvas `#0a0f1c`, raised surface `#121929`, sunken `#060a14`, ink `#edf0f7`, quiet ink `#9da7bd`, royal blue accent `#3d63db` with a lighter tint `#9bb6ff` for small text. Data: Cash `#0f7c55`, Cart `#5e6a79`, Coffee machine `#a8408f`, Owes the bank `#b73c1c`, Left for Maya `#3d63db`, which is the accent itself.
+- **Space and corners.** 4 px spacing grid (4 to 64 px), gutters 24 to 40 px. Corners 4, 8, 12 and 16 px; pills for tags and slider grooves.
+- **Motion.** 90 ms presses, 140 ms hovers, arrivals in 220 to 400 ms. Blocks ride a real spring: firm under the Student's hand, softer when the Chatbot moves them. Reduced motion shows each settled state at once.
 
 ### Night glow — [notes](night/NOTES.md) · [night.css](night/night.css)
 
@@ -42,4 +49,4 @@ Amounts block means the whole instrument: totals, stacks and ledger together. At
 - **Space and corners.** 4 px spacing unit (4 to 48 px), gutters `clamp(24px, 3vw, 52px)`. Corners 5, 10 and 16 px; pills for tags and slider tracks.
 - **Motion.** 260 ms springs: blocks stack in with a stagger, a grabbed face tips and highlights, the changed blocks regrow when the Chatbot acts. Drag a movable block directly, or use its slider; the fixed Cart never moves. Reduced motion shows the final state plainly.
 
-All three looks use tabular, lining numerals, keep touch targets at 44 px or more, honour reduced motion, and work opened straight from the file with nothing loaded from the network.
+All four looks use tabular, lining numerals, keep touch targets at 44 px or more, honour reduced motion, and work opened straight from the file with nothing loaded from the network.

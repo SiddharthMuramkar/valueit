@@ -1,3 +1,9 @@
+## Workspace
+
+This repo is self-contained: its code, docs, and glossary are the whole picture. Work from what is here; reach outside the repo only when the user points you there or the task cannot be done without it.
+
+Worktrees live in one place: `.claude/worktrees/<name>` under the main checkout (gitignored), the same spot Claude Code's own worktree tools use. Manual ones: `git worktree add .claude/worktrees/<name> -b <branch>`.
+
 ## Agent skills
 
 ### Issue tracker

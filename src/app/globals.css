@@ -1,0 +1,27 @@
+@import "tailwindcss" source("../");
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: dark;
+  --background: #090e1b;
+  --foreground: #f1f4fa;
+  --card: #101727;
+  --card-foreground: var(--foreground);
+  --primary: #4169e1;
+  --muted-foreground: #b3bfd3;
+  --border: #273248;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+}

@@ -1,3 +1,5 @@
+Follow [AGENTS.md](AGENTS.md) for app setup, checks, and stack decisions.
+
 ## Workspace
 
 This repo is self-contained: its code, docs, and glossary are the whole picture. Work from what is here; reach outside the repo only when the user points you there or the task cannot be done without it.

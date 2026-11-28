@@ -6,6 +6,8 @@ A guided course that teaches finance, following Aswath Damodaran's classes. It i
 
 The Course is made of five Topics, in a fixed order. Each Topic is made of Lessons, in a fixed order. Each Lesson follows one Lesson Plan. People mostly talk about Topics and Lessons; the Course is just all of them together.
 
+The Chatbot builds each Widget during the Lesson from Building blocks, following the Lesson Plan's Widget brief.
+
 Each Topic is built on one or two of Damodaran's Classes. Each Lesson is built on one Session, part of a dense one, two short ones joined, or matching parts of two, in his order.
 
 Portfolio Management is built on his Investment Philosophies Class: it is about choosing a way of investing, not about building a portfolio.
@@ -25,7 +27,7 @@ One piece of a Topic, taken in one sitting, that every Student follows along the
 _Avoid_: session (a session is Damodaran's), chapter, unit, part
 
 **Lesson Plan**:
-What a Lesson is written ahead of time: its ideas in order, what the Student must understand from each, its Widgets, its Test intuition questions, the Widget that shows why each wrong answer is wrong, and the Damodaran material each idea rests on.
+The plan written before a Lesson. It sets out the ideas in order, what the Student should understand, the Damodaran material behind each idea, the Widget briefs, and the Test intuition questions with a Widget brief for explaining each wrong answer.
 _Avoid_: script, outline, syllabus
 
 **Student**:
@@ -37,8 +39,16 @@ The AI that teaches a Lesson, following the Lesson Plan and adapting to the Stud
 _Avoid_: tutor, assistant, agent
 
 **Widget**:
-An interactive piece of a Lesson that a Student can change and watch respond, and that the Chatbot can change too. It is part of how the Chatbot teaches, not a separate thing.
+An interactive piece of a Lesson that a Student can change and watch respond. The Chatbot builds it live from Building blocks and can read and change its values as it teaches.
 _Avoid_: component, visual, tool
+
+**Widget brief**:
+The part of a Lesson Plan that specifies what the Student must see or change in a Widget and the fixed figures it uses.
+_Avoid_: template, spec, ready-made Widget
+
+**Building block**:
+A reusable piece made ahead for the Chatbot to use in a Widget, such as a chart, table, formula view or number input, with the finance maths behind it.
+_Avoid_: component, catalog item
 
 **Test intuition**:
 A question inside a Lesson's flow, with four answers and one right, that checks a Student has grasped an idea rather than that they can do the sums.
